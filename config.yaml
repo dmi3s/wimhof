@@ -1,10 +1,14 @@
-иackground_image: assets/background.jpg
+# config.yaml
+
+background_image: assets/background1.jpg
 background_music: assets/music.mp3
 
 rounds:
   - name: "Round 1"
 
-    repetitions: 35
+    label: "Подход 1(3)"
+
+    repetitions: 30
 
     inhale:
       duration: 2.2
@@ -19,6 +23,8 @@ rounds:
       label: "ПАУЗА"
 
   - name: "Round 2"
+
+    label: "Подход 2(3)"
 
     repetitions: 35
 
@@ -35,6 +41,8 @@ rounds:
       label: "ПАУЗА"
 
   - name: "Round 3"
+
+    label: "Подход 3(3)"
 
     repetitions: 40
 

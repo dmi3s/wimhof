@@ -1,10 +1,13 @@
 [project]
 name = "wimhof"
 version = "0.1.0"
-description = "Add your description here"
+description = "Atmospheric desktop breathing trainer inspired by the Wim Hof method."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "pyside6>=6.11.1",
     "pyyaml>=6.0.3",
 ]
+
+# [project.scripts]
+# main = "wimhof.main:main"

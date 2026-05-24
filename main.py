@@ -39,16 +39,69 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QApplication, QWidget
 
+from PySide6.QtCore import QEasingCurve
+from PySide6.QtGui import QPen
 # ============================================================
 # CONFIG
 # ============================================================
-
 
 @dataclass
 class Phase:
     type: str
     duration: float
     label: str
+    round_name: str
+    remaining_cycles: int
+
+
+def load_schedule(data: dict) -> list[Phase]:
+    phases: list[Phase] = []
+
+    for round_cfg in data["rounds"]:
+
+        round_name = round_cfg["name"]
+
+        repetitions = round_cfg["repetitions"]
+
+        inhale = round_cfg["inhale"]
+        exhale = round_cfg["exhale"]
+        pause = round_cfg["pause"]
+
+        for i in range(repetitions):
+
+            remaining = repetitions - i
+
+            phases.append(
+                Phase(
+                    type="inhale",
+                    duration=inhale["duration"],
+                    label=inhale["label"],
+                    round_name=round_name,
+                    remaining_cycles=remaining,
+                )
+            )
+
+            phases.append(
+                Phase(
+                    type="exhale",
+                    duration=exhale["duration"],
+                    label=exhale["label"],
+                    round_name=round_name,
+                    remaining_cycles=remaining,
+                )
+            )
+
+        phases.append(
+            Phase(
+                type="pause",
+                duration=pause["duration"],
+                label=pause["label"],
+                round_name=round_name,
+                remaining_cycles=0,
+            )
+        )
+
+    return phases
 
 
 @dataclass
@@ -57,30 +110,31 @@ class Config:
     background_music: str
     phases: list[Phase]
 
-
 def load_config(path: str) -> Config:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    phases = [
-        Phase(
-            type=item["type"],
-            duration=float(item["duration"]),
-            label=item["label"],
-        )
-        for item in data["schedule"]
-    ]
-
     return Config(
         background_image=data["background_image"],
         background_music=data["background_music"],
-        phases=phases,
+        phases=load_schedule(data),
     )
-
 
 # ============================================================
 # GUI
 # ============================================================
+
+# ============================================================
+# easing helper
+# ============================================================
+
+def ease_in_out(t: float) -> float:
+    """
+    Smooth cinematic easing.
+    t: 0.0 -> 1.0
+    """
+    curve = QEasingCurve(QEasingCurve.InOutSine)
+    return curve.valueForProgress(t)
 
 
 class BreathingWidget(QWidget):
@@ -152,26 +206,36 @@ class BreathingWidget(QWidget):
         self.phase_elapsed = 0.0
 
     # --------------------------------------------------------
-
     def update_animation(self):
         dt = 0.016
+
         self.phase_elapsed += dt
 
         phase = self.phase
 
-        progress = min(self.phase_elapsed / phase.duration, 1.0)
+        raw_progress = min(
+            self.phase_elapsed / phase.duration,
+            1.0,
+        )
+
+        progress = ease_in_out(raw_progress)
 
         if phase.type == "inhale":
+
             self.current_radius = (
-                self.MIN_RADIUS + (self.MAX_RADIUS - self.MIN_RADIUS) * progress
+                self.MIN_RADIUS
+                + (self.MAX_RADIUS - self.MIN_RADIUS) * progress
             )
 
         elif phase.type == "exhale":
+
             self.current_radius = (
-                self.MAX_RADIUS - (self.MAX_RADIUS - self.MIN_RADIUS) * progress
+                self.MAX_RADIUS
+                - (self.MAX_RADIUS - self.MIN_RADIUS) * progress
             )
 
         elif phase.type == "pause":
+
             self.current_radius = self.MIN_RADIUS
 
         if self.phase_elapsed >= phase.duration:
@@ -196,11 +260,52 @@ class BreathingWidget(QWidget):
         center_x = self.width() / 2
         center_y = self.height() / 2
 
-        # breathing circle
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(QColor(80, 200, 255, 180))
+        phase = self.phase
+
+        # ============================================================
+        # BREATHING RING
+        # ============================================================
 
         r = self.current_radius
+
+        # ------------------------------------------------------------
+        # glow
+        # ------------------------------------------------------------
+
+        for i in range(4):
+
+            glow_alpha = 18 - i * 4
+
+            glow_pen = QPen(
+                QColor(80, 200, 255, glow_alpha)
+            )
+
+            glow_pen.setWidth(18 - i * 3)
+
+            painter.setPen(glow_pen)
+
+            painter.drawEllipse(
+                QRectF(
+                    center_x - r,
+                    center_y - r,
+                    r * 2,
+                    r * 2,
+                )
+            )
+
+        # ------------------------------------------------------------
+        # main ring
+        # ------------------------------------------------------------
+
+        main_pen = QPen(
+            QColor(120, 220, 255, 140)
+        )
+
+        main_pen.setWidth(7)
+        main_pen.setCapStyle(Qt.RoundCap)
+
+        painter.setPen(main_pen)
+        painter.setBrush(Qt.NoBrush)
 
         painter.drawEllipse(
             QRectF(
@@ -226,7 +331,7 @@ class BreathingWidget(QWidget):
             )
             text = str(remaining)
         else:
-            text = str(self.breath_counter)
+            text = str(phase.remaining_cycles)
 
         painter.drawText(
             self.rect(),
@@ -249,6 +354,25 @@ class BreathingWidget(QWidget):
             phase.label,
         )
 
+        # ============================================================
+        # ROUND NAME
+        # ============================================================
+
+        round_font = QFont("Arial", 28, QFont.Bold)
+        painter.setFont(round_font)
+
+        painter.setPen(QColor("white"))
+
+        painter.drawText(
+            QRectF(
+                0,
+                40,
+                self.width(),
+                60,
+            ),
+            Qt.AlignHCenter | Qt.AlignTop,
+            phase.round_name,
+        )
 
 # ============================================================
 # MAIN
