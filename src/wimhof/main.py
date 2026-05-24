@@ -228,14 +228,8 @@ class BreathingWidget(QWidget):
         self.setWindowTitle("Wim Hof Breathing")
         self.setWindowFlags(Qt.FramelessWindowHint)
 
-        layout = QVBoxLayout(self)
-        self.help_label = QLabel("")
-        layout.addWidget(self.help_label)
-        self.setLayout(layout)
-        self.help_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-        self.help_label.setWordWrap(True)
-        self.help_label.setFont(QFont("Sans-serif", 16, QFont.Medium))
-        self.help_label.setWindowTitle("Q or Esc to exit\nSpace to pause")
+        self.paused = False
+        self.completed = False
 
         self.showFullScreen()
 
@@ -281,10 +275,14 @@ class BreathingWidget(QWidget):
         self.t = 0.0
 
         if self.index >= len(self.phases):
-            self.index = 0
+            self.index = len(self.phases) - 1
 
-        if self.phase.type == "prpare":
-            self.photo_label.choose_random()
+            self.completed = True
+
+            self.timer.stop()
+            self.player.stop()
+
+            return
     # --------------------------------------------------------
 
     def tick(self):
@@ -458,6 +456,47 @@ class BreathingWidget(QWidget):
         else:
             self.draw_ring(painter, cx, cy)
 
+
+        if self.paused:
+            painter.fillRect(
+                self.rect(),
+                QColor(0, 0, 0, 220)
+            )
+
+            painter.setPen(QColor(255, 255, 255))
+
+            painter.setFont(QFont("Arial", 44, QFont.Bold))
+
+            painter.drawText(
+                self.rect(),
+                Qt.AlignCenter,
+                "Press Space to continue"
+            )
+
+        elif self.completed:
+            painter.fillRect(
+                self.rect(),
+                QColor(0, 0, 0, 235)
+            )
+
+            painter.setPen(QColor(255, 255, 255))
+
+            painter.setFont(QFont("Arial", 56, QFont.Bold))
+
+            painter.drawText(
+                self.rect(),
+                Qt.AlignCenter,
+                "Completed"
+            )
+
+            painter.setFont(QFont("Arial", 22))
+
+            painter.drawText(
+                self.rect().adjusted(0, 140, 0, 0),
+                Qt.AlignCenter,
+                "Press Space to restart"
+            )
+
         painter.end()
 
    # --------------------------------------------------------
@@ -611,12 +650,32 @@ class BreathingWidget(QWidget):
                 QApplication.quit()
                 return True
             if key.key() == Qt.Key.Key_Space:
-                if self.timer.isActive():
+                # ====================================================
+                # completed session restart
+                # ====================================================
+
+                if self.completed:
+                    self.completed = False
+
+                    self.index = 0
+                    self.t = 0.0
+
+                    self.timer.reset()
+                    self.player.play()
+
+                elif not self.paused:
+                    self.paused = True
+
                     self.timer.pause()
                     self.player.pause()
+
                 else:
+                    self.paused = False
+
                     self.timer.resume()
                     self.player.play()
+
+                self.update()
 
                 return True
 
