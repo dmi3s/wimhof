@@ -377,6 +377,12 @@ class BreathingWidget(QWidget):
         )
 
         # ====================================================
+        # DRAW TIMELINE
+        # ====================================================
+
+        self.draw_timeline(painter)
+
+        # ====================================================
         # ROUND LABEL
         # ====================================================
 
@@ -641,6 +647,93 @@ class BreathingWidget(QWidget):
             int(span_angle),
         )
     # --------------------------------------------------------
+
+    def draw_timeline(self, painter):
+        x1 = 120
+        x2 = self.width() - 120
+
+        y = self.height() - 100
+
+        w = x2 - x1
+
+        # ====================================================
+        # background line
+        # ====================================================
+
+        pen = QPen(QColor(255, 255, 255, 60))
+        pen.setWidth(8)
+
+        painter.setPen(pen)
+
+        painter.drawLine(x1, y, x2, y)
+
+        # ====================================================
+        # progress
+        # ====================================================
+
+        total = len(self.phases)
+
+        progress = self.index / max(1, total - 1)
+
+        px = x1 + w * progress
+
+        pen = QPen(QColor(120, 220, 255, 220))
+        pen.setWidth(8)
+
+        painter.setPen(pen)
+
+        painter.drawLine(x1, y, int(px), y)
+
+        # ====================================================
+        # phase markers
+        # ====================================================
+
+        for i, ph in enumerate(self.phases):
+            marker_x = x1 + w * (i / max(1, total - 1))
+
+            alpha = 140
+
+            if i <= self.index:
+                alpha = 255
+
+            painter.setPen(Qt.NoPen)
+
+            if ph.type == "prepare":
+                painter.setBrush(QColor(255, 220, 120, alpha))
+            elif ph.type in ("hold", "final_hold"):
+                painter.setBrush(QColor(120, 255, 200, alpha))
+            else:
+                painter.setBrush(QColor(255, 255, 255, alpha))
+
+            painter.drawEllipse(
+                QRectF(marker_x - 3, y - 3, 6, 6)
+            )
+
+        # ====================================================
+        # round markers
+        # ====================================================
+
+        round_positions = {}
+
+        for i, ph in enumerate(self.phases):
+            if ph.round_index not in round_positions:
+                round_positions[ph.round_index] = i
+
+        painter.setPen(QPen(QColor(255, 255, 255, 180), 2))
+
+        for r, idx in round_positions.items():
+            rx = x1 + w * (idx / max(1, total - 1))
+
+            painter.drawLine(rx, y - 18, rx, y + 18)
+
+            painter.setFont(QFont("Arial", 10))
+
+            painter.drawText(
+                QRectF(rx - 30, y - 40, 60, 20),
+                Qt.AlignCenter,
+                str(r),
+            )
+
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         if event.type() == QEvent.Type.KeyPress:
