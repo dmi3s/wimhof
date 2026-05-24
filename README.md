@@ -46,9 +46,9 @@ Each round consists of:
 
 ---
 
-## Screenshot
+## 🎬🖥️ Demo video
 
-![Screenshot](assets/screenshot.png)
+<video src="demo/demo-v.0.1.0.webm" autoplay loop muted></video>
 
 ---
 

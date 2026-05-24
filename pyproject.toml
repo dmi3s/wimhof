@@ -15,3 +15,11 @@ dependencies = [
 
 [project.scripts]
 wimhof = "wimhof.main:main"
+
+[[project.authors]]
+name = "Sergey (dmi3s) Dmitriev"
+email = "dmi3evsv@gmail.com"
+
+[[project.authors]]
+name = "ChatGPT"
+
