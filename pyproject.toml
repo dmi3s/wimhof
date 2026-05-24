@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "wimhof"
 version = "0.1.0"
@@ -9,5 +13,5 @@ dependencies = [
     "pyyaml>=6.0.3",
 ]
 
-# [project.scripts]
-# main = "wimhof.main:main"
+[project.scripts]
+wimhof = "wimhof.main:main"

@@ -1,40 +1,73 @@
 # Wim Hof Breathing Trainer
 
-Atmospheric desktop breathing trainer inspired by the Wim Hof method.
+_Atmospheric desktop breathing trainer inspired by the Wim Hof method._
 
-Built with:
+Built with PySide6 and YAML-driven session configuration, featuring smooth animations, ambient visuals, and structured breathing rounds.
 
-- Python 3.12+
-- PySide6
-- YAML-based breathing schedules
-- Fullscreen meditation-style UI
-- Ambient background music
-- Smooth breathing animations
+Inspired by this video: [Техника Вима Хофа | Почему она работает так хорошо?](https://www.youtube.com/watch?v=JvcbOnzZkyc).
 
 ---
 
-## Features
+## ✨ Features
 
-- Expanding / shrinking breathing ring
-- Smooth easing animation
-- Glow effects
-- Fullscreen minimalistic UI
-- Countdown breathing cycles
-- Pause timer
-- Round names
-- YAML-configurable breathing schedule
+- Guided Wim Hof breathing sessions
+- Multi-round support (30–40+ cycles per round)
+- Deep inhale + breath hold + final countdown phase
+- Smooth easing breathing animation
+- Glowing breathing ring visualization
+- Round progress display (e.g. `Round 1/3`)
+- Cycle countdown per round
+- Fullscreen immersive UI
 - Background image support
-- Looping background music
+- Looping ambient music
+- Keyboard control (ESC or Q to exit)
+
+---
+
+## 🧠 Breathing Protocol
+
+Where are three rounds of breathing.
+
+Each round consists of:
+
+1. Breathing cycles (inhale / exhale repeated ~30 times)
+2. Breath hold (~60 seconds)
+3. Deep inhale after hold (~3 seconds)
+4. Breath hold (~15 seconds)
+5. Relax countdown (3–5 seconds, no visual ring)
 
 ---
 
 ## Screenshot
 
-_Add your screenshot here later._
+![Screenshot](assets/screenshot.png)
 
 ---
 
-## Installation
+## 📁 Project Structure
+
+```text
+wimhof
+├── assets
+│   ├── background.jpg
+│   ├── music.mp3
+│   ├── screenshot.png
+├── config.yaml
+├── pyproject.toml
+├── README.md
+├── src
+│   └── wimhof
+│       ├── __init__.py
+│       └── main.py
+├── .gitignore
+├── .gitattributes
+├── uv.lock
+
+```
+
+---
+
+## ⚙️ Installation
 
 Clone repository:
 
@@ -44,81 +77,21 @@ cd wimhof
 
 ```
 
-# Wim Hof Breathing Trainer
-
-Atmospheric desktop breathing trainer inspired by the Wim Hof method.
-
-Built with:
-
-- Python 3.12+
-- PySide6
-- YAML-based breathing schedules
-- Fullscreen meditation-style UI
-- Ambient background music
-- Smooth breathing animations
-
----
-
-## Features
-
-- Expanding / shrinking breathing ring
-- Smooth easing animation
-- Glow effects
-- Fullscreen minimalistic UI
-- Countdown breathing cycles
-- Pause timer
-- Round names
-- YAML-configurable breathing schedule
-- Background image support
-- Looping background music
-
----
-
-## Screenshot
-
-_Add your screenshot here later._
-
----
-
-## Installation
-
-Clone repository:
-
-```bash
-git clone https://github.com/yourname/wimhof.git
-cd wimhof
-```
-
-Install dependencies with uv:
+Using [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv sync
 ```
 
-Run application:
+Run the application:
 
 ```bash
-uv run python main.py
+uv run wimhof
 ```
 
-## Project Structure
+⚙️ Configuration
 
-```
-wimhof/
-├── assets/
-│   ├── background.jpg
-│   └── music.mp3
-├── main.py
-├── config.yaml
-├── pyproject.toml
-├── README.md
-├── .gitignore
-└── .gitattributes
-```
-
-## Configuration
-
-All breathing schedules are stored in config.yaml.
+All breathing logic is defined in config.yaml.
 
 Example:
 
@@ -128,7 +101,6 @@ background_music: assets/music.mp3
 
 rounds:
   - name: "Round 1"
-
     repetitions: 30
 
     inhale:
@@ -139,74 +111,73 @@ rounds:
       duration: 2.2
       label: "EXHALE"
 
-    pause:
-      duration: 60
-      label: "PAUSE"
+    hold:
+      duration: 60.0
+      label: "HOLD"
+
+    deep_inhale:
+      duration: 3.0
+      label: "DEEP INHALE"
+
+    final_hold:
+      duration: 15.0
+      label: "HOLD"
+
+    relax_countdown:
+      duration: 5.0
+      label: "RELAX"
+
+  - name: "Round 2"
+    repetitions: 30
+    inherit: true
+
+  - name: "Round 3"
+    repetitions: 30
+    inherit: true
 ```
 
-## Customization
+## 🎨 Controls
 
-You can easily customize:
+| Key      | Action           |
+| -------- | ---------------- |
+| ESC or Q | Exit application |
 
-- breathing speed
-- number of cycles
-- pause duration
-- background image
-- ambient music
-- round presets
+## 🧘 Usage Notes
 
-Possible breathing styles:
+This application is designed for controlled breathing practice and relaxation.
 
-- Wim Hof
-- Box Breathing
-- 4-7-8
-- Coherent Breathing
-- Relaxation sessions
-- Focus sessions
+⚠️ Do not use while driving, swimming, or in unsafe environments.
 
-## Controls
+## 🎵 Media Sources
 
-| Key | Action           |
-| --- | ---------------- |
-| ESC | Exit application |
+Background image and music are used under free licenses:
 
-##Dependencies
+- [Background Image](https://www.pexels.com/search/relaxing%20desktop%20wallpaper/), Author: [Solvej Nielsen](https://www.pexels.com/@solvej-nielsen-64837698/)
 
-Defined in pyproject.toml:
+- [Background Music](https://www.chosic.com/download-audio/59361/), Artist: [Alex-Productions](https://www.chosic.com/free-music/all/?keyword=Alex-Productions&artist)
+
+## 🧩 Dependencies
+
+Defined in [pyproject.toml](pyproject.toml):
 
 ```toml
 dependencies = [
-    "pyside6>=6.11.1",
-    "pyyaml>=6.0.3",
+  "pyside6>=6.11.1",
+  "pyyaml>=6.0.3",
 ]
 ```
 
-## Development
+## 🚀 Roadmap (🧊 Icebox)
 
-Run without activating virtualenv:
+- Audio cues for inhale/exhale transitions
+- Voice guidance (TTS coach mode)
+- Session presets (Focus / Sleep / Energy)
+- Statistics tracking
+- Mobile version (Qt/QML or Flutter rewrite)
+- Haptic feedback support
 
-```bash
-uv run python main.py
-```
+## 📄 License
 
-Add new dependency:
+[WTFPL 2.0](https://www.wtfpl.net/)
 
-```bash
-uv add package_name
-```
-
-Update lockfile:
-
-```bash
-uv lock
-```
-
-## Notes
-
-This project was created as a lightweight atmospheric breathing trainer focused on simplicity and immersion rather than medical functionality.
-
-Use responsibly and avoid intensive breathing exercises in unsafe situations.
-
-## License
-
-MIT
+© 2026 dmi3s

@@ -1,59 +1,38 @@
-# config.yaml
-
-background_image: assets/background1.jpg
+background_image: assets/background.jpg
 background_music: assets/music.mp3
 
 rounds:
   - name: "Round 1"
-
-    label: "Подход 1(3)"
-
-    repetitions: 30
+    repetitions: 2
 
     inhale:
       duration: 2.2
-      label: "ВДОХ"
+      label: "INHALE"
 
     exhale:
       duration: 2.2
-      label: "ВЫДОХ"
+      label: "EXHALE"
 
-    pause:
-      duration: 60
-      label: "ПАУЗА"
+    hold:
+      duration: 5.0
+      label: "HOLD"
+
+    deep_inhale:
+      duration: 3.0
+      label: "DEEP INHALE"
+
+    final_hold:
+      duration: 3.0
+      label: "HOLD"
+
+    relax_countdown:
+      duration: 5.0
+      label: "RELAX"
 
   - name: "Round 2"
-
-    label: "Подход 2(3)"
-
-    repetitions: 35
-
-    inhale:
-      duration: 2.2
-      label: "ВДОХ"
-
-    exhale:
-      duration: 2.2
-      label: "ВЫДОХ"
-
-    pause:
-      duration: 90
-      label: "ПАУЗА"
+    repetitions: 15
+    inherit: true
 
   - name: "Round 3"
-
-    label: "Подход 3(3)"
-
-    repetitions: 40
-
-    inhale:
-      duration: 2.0
-      label: "ВДОХ"
-
-    exhale:
-      duration: 2.0
-      label: "ВЫДОХ"
-
-    pause:
-      duration: 120
-      label: "ПАУЗА"
+    repetitions: 1
+    inherit: true
