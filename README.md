@@ -1,10 +1,10 @@
 # Wim Hof Breathing Trainer
 
-_Atmospheric desktop breathing trainer inspired by the Wim Hof method._
+_Atmospheric desktop breathing trainer.Inspired by the Wim Hof breathing method._
 
 Built with PySide6 and YAML-driven session configuration, featuring smooth animations, ambient visuals, and structured breathing rounds.
 
-Inspired by this video: [Техника Вима Хофа | Почему она работает так хорошо?](https://www.youtube.com/watch?v=JvcbOnzZkyc).
+Very thanks to authors of this video: [Техника Вима Хофа | Почему она работает так хорошо?](https://www.youtube.com/watch?v=JvcbOnzZkyc).
 
 ---
 
@@ -17,16 +17,24 @@ Inspired by this video: [Техника Вима Хофа | Почему она 
 - Glowing breathing ring visualization
 - Round progress display (e.g. `Round 1/3`)
 - Cycle countdown per round
-- Fullscreen immersive UI
+- Immersive fullscreen interface
 - Background image support
 - Looping ambient music
 - Keyboard control (ESC or Q to exit)
 
 ---
 
+## 🌊 Design Philosophy
+
+This project focuses on calm pacing, smooth transitions, and uninterrupted breathing flow.
+
+The goal is not feature complexity, but creating a comfortable and immersive breathing experience.
+
+---
+
 ## 🧠 Breathing Protocol
 
-Where are three rounds of breathing.
+The default session consists of three breathing rounds.
 
 Each round consists of:
 
@@ -89,7 +97,7 @@ Run the application:
 uv run wimhof
 ```
 
-⚙️ Configuration
+## ⚙️ Configuration
 
 All breathing logic is defined in config.yaml.
 
@@ -138,11 +146,11 @@ rounds:
 
 ## 🎨 Controls
 
-| Key      | Action           |
-| -------- | ---------------- |
-| ESC or Q | Exit application |
-| M        | Mute/Unmute      |
-| Space    | Start/Stop       |
+|   Key    |          Action          |
+| :------: | :----------------------: |
+| ESC or Q |     Exit application     |
+|    M     |      Mute / Unmute       |
+|  Space   | Pause / Resume / Restart |
 
 ## 🧘 Usage Notes
 
@@ -154,9 +162,7 @@ This application is designed for controlled breathing practice and relaxation.
 
 Background image and music are used under free licenses:
 
-- [Background Image](https://www.pexels.com/search/relaxing%20desktop%20wallpaper/), Author: [Solvej Nielsen](https://www.pexels.com/@solvej-nielsen-64837698/)
-
-- [Background Music](https://www.chosic.com/download-audio/59361/), Artist: [Alex-Productions](https://www.chosic.com/free-music/all/?keyword=Alex-Productions&artist)
+Full attribution information is available in [assets/sources.md](assets/sources.md).
 
 ## 🧩 Dependencies
 
@@ -175,7 +181,7 @@ dependencies = [
 - Voice guidance (TTS coach mode)
 - Session presets (Focus / Sleep / Energy)
 - Statistics tracking
-- Mobile version (Qt/QML or Flutter rewrite)
+- Mobile version
 - Haptic feedback support
 
 ## 📄 License
