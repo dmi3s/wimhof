@@ -1,0 +1,51 @@
+иackground_image: assets/background.jpg
+background_music: assets/music.mp3
+
+rounds:
+  - name: "Round 1"
+
+    repetitions: 35
+
+    inhale:
+      duration: 2.2
+      label: "ВДОХ"
+
+    exhale:
+      duration: 2.2
+      label: "ВЫДОХ"
+
+    pause:
+      duration: 60
+      label: "ПАУЗА"
+
+  - name: "Round 2"
+
+    repetitions: 35
+
+    inhale:
+      duration: 2.2
+      label: "ВДОХ"
+
+    exhale:
+      duration: 2.2
+      label: "ВЫДОХ"
+
+    pause:
+      duration: 90
+      label: "ПАУЗА"
+
+  - name: "Round 3"
+
+    repetitions: 40
+
+    inhale:
+      duration: 2.0
+      label: "ВДОХ"
+
+    exhale:
+      duration: 2.0
+      label: "ВЫДОХ"
+
+    pause:
+      duration: 120
+      label: "ПАУЗА"
