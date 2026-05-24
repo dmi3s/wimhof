@@ -230,12 +230,23 @@ class BreathingWidget(QWidget):
 
         self.paused = False
         self.completed = False
+        self.muted = False
 
         self.showFullScreen()
 
         self.phases = load_config(config_path)
         self.index = 0
         self.t = 0.0
+
+        self.total_duration = sum(p.duration for p in self.phases)
+
+        self.phase_start_times = []
+
+        acc = 0.0
+
+        for ph in self.phases:
+            self.phase_start_times.append(acc)
+            acc += ph.duration
 
         self.radius = self.MIN_R
 
@@ -329,6 +340,18 @@ class BreathingWidget(QWidget):
             self.next()
 
         self.update()
+
+    # --------------------------------------------------------
+    #
+    def current_progress(self) -> float:
+        if self.completed:
+            return 1.0
+
+        phase_start = self.phase_start_times[self.index]
+
+        current_time = phase_start + self.t
+
+        return min(current_time / self.total_duration, 1.0)
 
     # --------------------------------------------------------
 
@@ -443,10 +466,12 @@ class BreathingWidget(QWidget):
         painter.setFont(QFont("Sans-serif", 16, QFont.Medium))
         painter.setPen(QColor(0x0C, 0x14, 0x55, 200))
 
+        mute_text = "M to mute" if not self.muted else "M to unmute"
+
         painter.drawText(
             self.rect().adjusted(space, space, -space, -space),
             Qt.AlignTop | Qt.AlignLeft,
-            "Q or Esc to exit\nSpace to pause",
+            f"Q or Esc to exit\nSpace to pause\n{mute_text}",
         )
 
         # ====================================================
@@ -673,7 +698,8 @@ class BreathingWidget(QWidget):
 
         total = len(self.phases)
 
-        progress = self.index / max(1, total - 1)
+        progress = self.current_progress()
+        # progress = self.index / max(1, total - 1)
 
         px = x1 + w * progress
 
@@ -742,7 +768,20 @@ class BreathingWidget(QWidget):
             if key.key() in (Qt.Key.Key_Escape, Qt.Key.Key_Q):
                 QApplication.quit()
                 return True
-            if key.key() == Qt.Key.Key_Space:
+
+            elif key.key() == Qt.Key.Key_M:
+
+                self.muted = not self.muted
+
+                if self.muted and not self.paused and not self.completed:
+                    self.player.pause()
+                else:
+                    if not (self.paused or self.completed or self.muted):
+                       self.player.play()
+
+                return True
+
+            elif key.key() == Qt.Key.Key_Space:
                 # ====================================================
                 # completed session restart
                 # ====================================================
@@ -754,19 +793,22 @@ class BreathingWidget(QWidget):
                     self.t = 0.0
 
                     self.timer.reset()
-                    self.player.play()
+                    if not self.muted:
+                        self.player.play()
 
                 elif not self.paused:
                     self.paused = True
 
                     self.timer.pause()
-                    self.player.pause()
+                    if not self.muted:
+                        self.player.pause()
 
                 else:
                     self.paused = False
 
                     self.timer.resume()
-                    self.player.play()
+                    if not self.muted:
+                        self.player.play()
 
                 self.update()
 
