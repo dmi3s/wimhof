@@ -141,6 +141,8 @@ rounds:
 | Key      | Action           |
 | -------- | ---------------- |
 | ESC or Q | Exit application |
+| M        | Mute/Unmute      |
+| Space    | Start/Stop       |
 
 ## 🧘 Usage Notes
 
@@ -180,4 +182,4 @@ dependencies = [
 
 [WTFPL 2.0](https://www.wtfpl.net/)
 
-© 2026 dmi3s
+© May 2026 dmi3s & ChatGPT

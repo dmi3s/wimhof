@@ -760,6 +760,31 @@ class BreathingWidget(QWidget):
                 str(r),
             )
 
+        # ====================================================
+        # final completion marker
+        # ====================================================
+
+        final_x = x2
+
+        painter.setPen(QColor(255, 255, 255, 180))
+
+        painter.setFont(QFont("Arial", 10))
+
+        painter.drawText(
+            QRectF(final_x - 20, y - 42, 40, 24),
+            Qt.AlignCenter,
+            "∅",
+        )
+
+        # subtle final vertical marker
+
+        pen = QPen(QColor(255, 255, 255, 120))
+        pen.setWidth(2)
+
+        painter.setPen(pen)
+
+        painter.drawLine(final_x, y - 18, final_x, y + 18)
+
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         if event.type() == QEvent.Type.KeyPress:
