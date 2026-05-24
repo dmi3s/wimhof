@@ -74,8 +74,27 @@ def load_config(path: str) -> list[Phase]:
 
         reps = cfg["repetitions"]
 
+        prepare = cfg.get("prepare", {})
         inhale = cfg["inhale"]
         exhale = cfg["exhale"]
+
+
+        # ====================================================
+        # 1. PREPARE PHASE
+        # ====================================================
+
+        if prepare:
+            phases.append(
+                Phase(
+                    type="prepare",
+                    duration=prepare["duration"],
+                    label=prepare["label"],
+                    round_index=ri + 1,
+                    round_total=total_rounds,
+                )
+            )
+
+
 
         # ====================================================
         # 1. BREATHING CYCLES
@@ -261,10 +280,11 @@ class BreathingWidget(QWidget):
             self.radius = base + (deep_max - base) * progress
 
         elif p.type == "hold":
-            self.radius = self.MIN_R
+            pulse = math.sin(self.t * 2.0) * 3.0
+            self.radius = self.MIN_R + pulse
 
         elif p.type == "final_hold":
-            pulse = math.sin(self.t * 3.0) * 3.0
+            pulse = math.sin(self.t * 2.0) * 3.0
             self.radius = above_max + pulse
 
         elif p.type == "relax_countdown":
@@ -320,6 +340,8 @@ class BreathingWidget(QWidget):
 
         elif p.type == "relax_countdown":
             text = str(max(0, math.ceil(p.duration - self.t)))
+        elif p.type == "prepare":
+            text = str(max(1, math.ceil(p.duration - self.t)))
         else:
             text = ""
 
@@ -349,8 +371,13 @@ class BreathingWidget(QWidget):
         # RING ONLY FOR BREATHING
         # ====================================================
 
-        if p.type not in ("relax_countdown",):
+        if p.type == "prepare":
+            self.draw_prepare_ring(painter, cx, cy)
+
+        elif p.type not in ("relax_countdown",):
             self.draw_ring(painter, cx, cy)
+
+        painter.end()
 
     # --------------------------------------------------------
 
@@ -375,6 +402,40 @@ class BreathingWidget(QWidget):
         painter.setBrush(Qt.NoBrush)
 
         painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
+
+    # --------------------------------------------------------
+
+    def draw_prepare_ring(self, painter, cx, cy):
+        r = self.MAX_R * 0.9
+
+        progress = min(self.t / self.phase.duration, 1.0)
+
+        # background circle
+        bg_pen = QPen(QColor(255, 255, 255, 40))
+        bg_pen.setWidth(8)
+
+        painter.setPen(bg_pen)
+        painter.setBrush(Qt.NoBrush)
+
+        painter.drawEllipse(
+            QRectF(cx - r, cy - r, r * 2, r * 2)
+        )
+
+        # animated arc
+        arc_pen = QPen(QColor(120, 220, 255, 220))
+        arc_pen.setWidth(8)
+        arc_pen.setCapStyle(Qt.RoundCap)
+
+        painter.setPen(arc_pen)
+
+        start_angle = 90 * 16
+        span_angle = -360 * progress * 16
+
+        painter.drawArc(
+            QRectF(cx - r, cy - r, r * 2, r * 2),
+            start_angle,
+            span_angle,
+        )
 
     # --------------------------------------------------------
 
