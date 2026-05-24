@@ -29,7 +29,7 @@ rounds:
       label: "HOLD"
 
     relax_countdown:
-      duration: 5.0
+      duration: 15.0
       label: "RELAX"
 
   - name: "Round 2"

@@ -24,7 +24,25 @@ from PySide6.QtGui import (
     QPixmap,
 )
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
+
+class QTimerWithPause(QTimer):
+    def __init__(self, parent=None, interval=0, singleShot=False):
+        super().__init__(parent)
+        self.setInterval(interval)
+        self.setSingleShot(singleShot)
+        self.remaining = 0
+
+    def pause(self):
+        self.remaining = self.remainingTime()
+        self.stop()
+
+    def resume(self):
+        self.start(self.remaining)
+
+    def reset(self):
+        self.start(self.interval())
+
 
 # ============================================================
 # DATA MODEL
@@ -209,6 +227,16 @@ class BreathingWidget(QWidget):
 
         self.setWindowTitle("Wim Hof Breathing")
         self.setWindowFlags(Qt.FramelessWindowHint)
+
+        layout = QVBoxLayout(self)
+        self.help_label = QLabel("")
+        layout.addWidget(self.help_label)
+        self.setLayout(layout)
+        self.help_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.help_label.setWordWrap(True)
+        self.help_label.setFont(QFont("Sans-serif", 16, QFont.Medium))
+        self.help_label.setWindowTitle("Q or Esc to exit\nSpace to pause")
+
         self.showFullScreen()
 
         self.phases = load_config(config_path)
@@ -219,7 +247,7 @@ class BreathingWidget(QWidget):
 
         self.bg = QPixmap("assets/background.jpg")
 
-        self.timer = QTimer(self)
+        self.timer = QTimerWithPause(self)
         self.timer.timeout.connect(self.tick)
         self.timer.start(16)
 
@@ -255,6 +283,8 @@ class BreathingWidget(QWidget):
         if self.index >= len(self.phases):
             self.index = 0
 
+        if self.phase.type == "prpare":
+            self.photo_label.choose_random()
     # --------------------------------------------------------
 
     def tick(self):
@@ -288,7 +318,14 @@ class BreathingWidget(QWidget):
             self.radius = above_max + pulse
 
         elif p.type == "relax_countdown":
-            self.radius = 0
+            self.radius = self.radius - (self.radius - self.MAX_R) * progress / 4
+            # was: self.radius = 0
+
+        elif p.type == "prepare":
+            start_r = self.MAX_R * 0.9
+            end_r = self.MIN_R
+
+            self.radius = start_r - (start_r - end_r) * progress
 
         if self.t >= p.duration:
             self.next()
@@ -305,22 +342,54 @@ class BreathingWidget(QWidget):
         if not self.bg.isNull():
             painter.drawPixmap(self.rect(), self.bg)
 
-        painter.fillRect(self.rect(), QColor(0, 0, 0, 140))
-
         p = self.phase
 
         cx = self.width() / 2
         cy = self.height() / 2
 
         # ====================================================
+        # BACKGROUND
+        # ====================================================
+
+        NORMAL_OVERLAY = 140
+
+        overlay_alpha = NORMAL_OVERLAY
+
+        # ====================================================
+        # PREPARE -> FADE IN
+        # ====================================================
+
+        if p.type == "prepare":
+            progress = min(self.t / p.duration, 1.0)
+            progress = ease(progress)
+            overlay_alpha = int(NORMAL_OVERLAY * progress)
+
+        # ====================================================
+        # RELAX -> FADE OUT
+        # ====================================================
+
+        elif p.type == "relax_countdown":
+            fade = 1.0 - min(self.t / p.duration, 1.0)
+            fade = ease(fade)
+            overlay_alpha = int(NORMAL_OVERLAY * fade)
+
+        painter.fillRect(
+            self.rect(),
+            QColor(0, 0, 0, overlay_alpha)
+        )
+
+        # ====================================================
         # ROUND LABEL
         # ====================================================
 
-        painter.setPen(QColor(255, 255, 255, 220))
+        painter.setPen(QColor(255, 255, 255, 230))
+
         painter.setFont(QFont("Arial", 22, QFont.Bold))
 
+        space = 56
+
         painter.drawText(
-            self.rect(),
+            self.rect().adjusted(space, space, -space, -space),
             Qt.AlignTop | Qt.AlignHCenter,
             f"Round {p.round_index}/{p.round_total}",
         )
@@ -330,7 +399,7 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         painter.setPen(QColor(255, 255, 255, 240))
-        painter.setFont(QFont("Arial", 44, QFont.Bold))
+        painter.setFont(QFont("Comic Sans", 44, QFont.Bold))
 
         if p.type in ("inhale", "exhale"):
             text = str(p.cycle_remaining)
@@ -351,21 +420,30 @@ class BreathingWidget(QWidget):
         # LABEL
         # ====================================================
 
-        painter.setPen(QColor(255, 255, 255, 230))
+        label_alpha = 230
+
+        if p.type == "relax_countdown":
+            fade = 1.0 - min(self.t / p.duration, 1.0)
+            label_alpha = int(230 * fade)
+
         painter.setFont(QFont("Arial", 32, QFont.Bold))
 
         painter.drawText(
-            QRectF(0, self.height() * 0.70, self.width(), 100), Qt.AlignHCenter, p.label
+            QRectF(0, self.height() * 0.15, self.width(), 100), Qt.AlignHCenter, p.label
         )
 
         # ====================================================
         # ESC HINT
         # ====================================================
 
-        painter.setFont(QFont("Arial", 13, QFont.Medium))
-        painter.setPen(QColor(230, 200, 90, 200))  # мягкий янтарный
+        painter.setFont(QFont("Sans-serif", 16, QFont.Medium))
+        painter.setPen(QColor(0x0C, 0x14, 0x55, 200))
 
-        painter.drawText(20, self.height() - 30, "Q or Esc to exit")
+        painter.drawText(
+            self.rect().adjusted(space, space, -space, -space),
+            Qt.AlignTop | Qt.AlignLeft,
+            "Q or Esc to exit\nSpace to pause",
+        )
 
         # ====================================================
         # RING ONLY FOR BREATHING
@@ -374,12 +452,15 @@ class BreathingWidget(QWidget):
         if p.type == "prepare":
             self.draw_prepare_ring(painter, cx, cy)
 
-        elif p.type not in ("relax_countdown",):
+        elif p.type == "relax_countdown":
+            self.draw_relax_ring(painter, cx, cy)
+
+        else:
             self.draw_ring(painter, cx, cy)
 
         painter.end()
 
-    # --------------------------------------------------------
+   # --------------------------------------------------------
 
     def draw_ring(self, painter, cx, cy):
         r = self.radius
@@ -405,13 +486,94 @@ class BreathingWidget(QWidget):
 
     # --------------------------------------------------------
 
-    def draw_prepare_ring(self, painter, cx, cy):
-        r = self.MAX_R * 0.9
+    def draw_relax_ring(self, painter, cx, cy):
+        r = self.radius
 
         progress = min(self.t / self.phase.duration, 1.0)
 
-        # background circle
-        bg_pen = QPen(QColor(255, 255, 255, 40))
+        remaining = 1.0 - progress
+
+        # ====================================================
+        # subtle fading background ring
+        # ====================================================
+
+        bg_alpha = int(40 * remaining)
+
+        bg_pen = QPen(QColor(255, 255, 255, bg_alpha))
+        bg_pen.setWidth(6)
+
+        painter.setPen(bg_pen)
+        painter.setBrush(Qt.NoBrush)
+
+        painter.drawEllipse(
+            QRectF(cx - r, cy - r, r * 2, r * 2)
+        )
+
+        # ====================================================
+        # animated disappearing arc
+        # ====================================================
+
+        glow_alpha = int(120 * remaining)
+
+        for i in range(3):
+            pen = QPen(QColor(80, 200, 255, glow_alpha // (i + 2)))
+            pen.setWidth(max(1, 14 - i * 4))
+
+            painter.setPen(pen)
+
+            start_angle = 90 * 16
+            span_angle = -(360 * remaining) * 16
+
+            painter.drawArc(
+                QRectF(cx - r, cy - r, r * 2, r * 2),
+                start_angle,
+                int(span_angle),
+            )
+
+        # ====================================================
+        # main arc
+        # ====================================================
+
+        main_alpha = int(220 * remaining)
+
+        pen = QPen(QColor(120, 220, 255, main_alpha))
+        pen.setWidth(max(2, int(8 * remaining)))
+        pen.setCapStyle(Qt.RoundCap)
+
+        painter.setPen(pen)
+
+        painter.drawArc(
+            QRectF(cx - r, cy - r, r * 2, r * 2),
+            90 * 16,
+            int(-(360 * remaining) * 16),
+        )
+
+    # --------------------------------------------------------
+
+    def draw_prepare_ring(self, painter, cx, cy):
+        progress = min(self.t / self.phase.duration, 1.0)
+
+        # ====================================================
+        # smooth radius shrink
+        # ====================================================
+
+        # start_r = self.MAX_R * 0.9
+        # end_r = self.MIN_R
+
+        # r = start_r - (start_r - end_r) * progress
+        r = self.radius
+
+        # ====================================================
+        # fade-in alpha
+        # ====================================================
+
+        alpha = int(220 * progress)
+
+        # ====================================================
+        # background ring
+        # ====================================================
+
+        bg_pen = QPen(QColor(255, 255, 255, int(40 * progress)))
         bg_pen.setWidth(8)
 
         painter.setPen(bg_pen)
@@ -421,22 +583,24 @@ class BreathingWidget(QWidget):
             QRectF(cx - r, cy - r, r * 2, r * 2)
         )
 
+        # ====================================================
         # animated arc
-        arc_pen = QPen(QColor(120, 220, 255, 220))
+        # ====================================================
+
+        arc_pen = QPen(QColor(120, 220, 255, alpha))
         arc_pen.setWidth(8)
         arc_pen.setCapStyle(Qt.RoundCap)
 
         painter.setPen(arc_pen)
 
         start_angle = 90 * 16
-        span_angle = -360 * progress * 16
+        span_angle = -(360 * progress) * 16
 
         painter.drawArc(
             QRectF(cx - r, cy - r, r * 2, r * 2),
             start_angle,
-            span_angle,
+            int(span_angle),
         )
-
     # --------------------------------------------------------
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
@@ -445,6 +609,15 @@ class BreathingWidget(QWidget):
 
             if key.key() in (Qt.Key.Key_Escape, Qt.Key.Key_Q):
                 QApplication.quit()
+                return True
+            if key.key() == Qt.Key.Key_Space:
+                if self.timer.isActive():
+                    self.timer.pause()
+                    self.player.pause()
+                else:
+                    self.timer.resume()
+                    self.player.play()
+
                 return True
 
         return super().eventFilter(obj, event)
