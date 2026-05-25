@@ -24,7 +24,8 @@ from PySide6.QtGui import (
     QPixmap,
 )
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+
 
 class QTimerWithPause(QTimer):
     def __init__(self, parent=None, interval=0, singleShot=False):
@@ -96,7 +97,6 @@ def load_config(path: str) -> list[Phase]:
         inhale = cfg["inhale"]
         exhale = cfg["exhale"]
 
-
         # ====================================================
         # 1. PREPARE PHASE
         # ====================================================
@@ -111,8 +111,6 @@ def load_config(path: str) -> list[Phase]:
                     round_total=total_rounds,
                 )
             )
-
-
 
         # ====================================================
         # 1. BREATHING CYCLES
@@ -294,6 +292,7 @@ class BreathingWidget(QWidget):
             self.player.stop()
 
             return
+
     # --------------------------------------------------------
 
     def tick(self):
@@ -394,10 +393,7 @@ class BreathingWidget(QWidget):
             fade = ease(fade)
             overlay_alpha = int(NORMAL_OVERLAY * fade)
 
-        painter.fillRect(
-            self.rect(),
-            QColor(0, 0, 0, overlay_alpha)
-        )
+        painter.fillRect(self.rect(), QColor(0, 0, 0, overlay_alpha))
 
         # ====================================================
         # DRAW TIMELINE
@@ -487,50 +483,35 @@ class BreathingWidget(QWidget):
         else:
             self.draw_ring(painter, cx, cy)
 
-
         if self.paused:
-            painter.fillRect(
-                self.rect(),
-                QColor(0, 0, 0, 220)
-            )
+            painter.fillRect(self.rect(), QColor(0, 0, 0, 220))
 
             painter.setPen(QColor(255, 255, 255))
 
             painter.setFont(QFont("Arial", 44, QFont.Bold))
 
-            painter.drawText(
-                self.rect(),
-                Qt.AlignCenter,
-                "Press Space to continue"
-            )
+            painter.drawText(self.rect(), Qt.AlignCenter, "Press Space to continue")
 
         elif self.completed:
-            painter.fillRect(
-                self.rect(),
-                QColor(0, 0, 0, 235)
-            )
+            painter.fillRect(self.rect(), QColor(0, 0, 0, 235))
 
             painter.setPen(QColor(255, 255, 255))
 
             painter.setFont(QFont("Arial", 56, QFont.Bold))
 
-            painter.drawText(
-                self.rect(),
-                Qt.AlignCenter,
-                "Completed"
-            )
+            painter.drawText(self.rect(), Qt.AlignCenter, "Completed")
 
             painter.setFont(QFont("Arial", 22))
 
             painter.drawText(
                 self.rect().adjusted(0, 140, 0, 0),
                 Qt.AlignCenter,
-                "Press Space to restart"
+                "Press Space to restart",
             )
 
         painter.end()
 
-   # --------------------------------------------------------
+    # --------------------------------------------------------
 
     def draw_ring(self, painter, cx, cy):
         r = self.radius
@@ -575,9 +556,7 @@ class BreathingWidget(QWidget):
         painter.setPen(bg_pen)
         painter.setBrush(Qt.NoBrush)
 
-        painter.drawEllipse(
-            QRectF(cx - r, cy - r, r * 2, r * 2)
-        )
+        painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
 
         # ====================================================
         # animated disappearing arc
@@ -649,9 +628,7 @@ class BreathingWidget(QWidget):
         painter.setPen(bg_pen)
         painter.setBrush(Qt.NoBrush)
 
-        painter.drawEllipse(
-            QRectF(cx - r, cy - r, r * 2, r * 2)
-        )
+        painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
 
         # ====================================================
         # animated arc
@@ -671,72 +648,60 @@ class BreathingWidget(QWidget):
             start_angle,
             int(span_angle),
         )
+
     # --------------------------------------------------------
 
     def draw_timeline(self, painter):
-        x1 = 120
-        x2 = self.width() - 120
+        margin = 140
 
-        y = self.height() - 100
+        x = margin
+        y = self.height() - 90
 
-        w = x2 - x1
+        w = self.width() - margin * 2
+        h = 16
 
-        # ====================================================
-        # background line
-        # ====================================================
+        radius = h / 2
 
-        pen = QPen(QColor(255, 255, 255, 60))
-        pen.setWidth(8)
-
-        painter.setPen(pen)
-
-        painter.drawLine(x1, y, x2, y)
-
-        # ====================================================
-        # progress
-        # ====================================================
-
-        total = len(self.phases)
+        rect = QRectF(x, y, w, h)
 
         progress = self.current_progress()
-        # progress = self.index / max(1, total - 1)
 
-        px = x1 + w * progress
+        fill_w = w * progress
 
-        pen = QPen(QColor(120, 220, 255, 220))
-        pen.setWidth(8)
-
-        painter.setPen(pen)
-
-        painter.drawLine(x1, y, int(px), y)
+        fill_rect = QRectF(x, y, fill_w, h)
 
         # ====================================================
-        # phase markers
+        # background bar
         # ====================================================
 
-        for i, ph in enumerate(self.phases):
-            marker_x = x1 + w * (i / max(1, total - 1))
+        painter.setPen(Qt.NoPen)
 
-            alpha = 140
+        painter.setBrush(QColor(255, 255, 255, 28))
 
-            if i <= self.index:
-                alpha = 255
-
-            painter.setPen(Qt.NoPen)
-
-            if ph.type == "prepare":
-                painter.setBrush(QColor(255, 220, 120, alpha))
-            elif ph.type in ("hold", "final_hold"):
-                painter.setBrush(QColor(120, 255, 200, alpha))
-            else:
-                painter.setBrush(QColor(255, 255, 255, alpha))
-
-            painter.drawEllipse(
-                QRectF(marker_x - 3, y - 3, 6, 6)
-            )
+        painter.drawRoundedRect(rect, radius, radius)
 
         # ====================================================
-        # round markers
+        # progress fill
+        # ====================================================
+
+        painter.setBrush(QColor(120, 220, 255, 90))
+
+        painter.drawRoundedRect(fill_rect, radius, radius)
+
+        # ====================================================
+        # subtle glow
+        # ====================================================
+
+        glow_pen = QPen(QColor(120, 220, 255, 40))
+        glow_pen.setWidth(10)
+
+        painter.setPen(glow_pen)
+        painter.setBrush(Qt.NoBrush)
+
+        painter.drawRoundedRect(fill_rect, radius, radius)
+
+        # ====================================================
+        # round markers only
         # ====================================================
 
         round_positions = {}
@@ -745,46 +710,35 @@ class BreathingWidget(QWidget):
             if ph.round_index not in round_positions:
                 round_positions[ph.round_index] = i
 
-        painter.setPen(QPen(QColor(255, 255, 255, 180), 2))
+        total = len(self.phases)
 
-        for r, idx in round_positions.items():
-            rx = x1 + w * (idx / max(1, total - 1))
+        for _, idx in round_positions.items():
+            marker_progress = idx / max(1, total - 1)
 
-            painter.drawLine(rx, y - 18, rx, y + 18)
+            mx = x + w * marker_progress
 
-            painter.setFont(QFont("Arial", 10))
+            active = progress >= marker_progress
 
-            painter.drawText(
-                QRectF(rx - 30, y - 40, 60, 20),
-                Qt.AlignCenter,
-                str(r),
+            if active:
+                color = QColor(220, 240, 255, 180)
+                size = 10
+            else:
+                color = QColor(255, 255, 255, 70)
+                size = 8
+
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(color)
+
+            painter.drawEllipse(
+                QRectF(
+                    mx - size / 2,
+                    y + h / 2 - size / 2,
+                    size,
+                    size,
+                )
             )
 
-        # ====================================================
-        # final completion marker
-        # ====================================================
-
-        final_x = x2
-
-        painter.setPen(QColor(255, 255, 255, 180))
-
-        painter.setFont(QFont("Arial", 10))
-
-        painter.drawText(
-            QRectF(final_x - 20, y - 42, 40, 24),
-            Qt.AlignCenter,
-            "∅",
-        )
-
-        # subtle final vertical marker
-
-        pen = QPen(QColor(255, 255, 255, 120))
-        pen.setWidth(2)
-
-        painter.setPen(pen)
-
-        painter.drawLine(final_x, y - 18, final_x, y + 18)
-
+    # --------------------------------------------------------
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         if event.type() == QEvent.Type.KeyPress:
@@ -795,14 +749,13 @@ class BreathingWidget(QWidget):
                 return True
 
             elif key.key() == Qt.Key.Key_M:
-
                 self.muted = not self.muted
 
                 if self.muted and not self.paused and not self.completed:
                     self.player.pause()
                 else:
                     if not (self.paused or self.completed or self.muted):
-                       self.player.play()
+                        self.player.play()
 
                 return True
 

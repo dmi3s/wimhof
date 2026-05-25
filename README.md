@@ -50,7 +50,7 @@ Each round consists of:
 
 ![demo/demo-v.0.1.0-preview.png](demo/demo-v.0.1.0.jpg)
 
-##### [demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (1.1 Mb)
+##### [demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (1.0 Mb)
 
 ## 📁 Project Structure
 
