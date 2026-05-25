@@ -407,9 +407,10 @@ class BreathingWidget(QWidget):
         # ROUND LABEL
         # ====================================================
 
-        painter.setPen(QColor(255, 255, 255, 230))
+        # painter.setPen(QColor(255, 255, 255, 230))
+        painter.setPen(QColor(200, 200, 200, 230))
 
-        painter.setFont(QFont("Arial", 22, QFont.Bold))
+        painter.setFont(QFont("Liberation Sans", 22, QFont.Bold))
 
         space = 56
 
@@ -424,7 +425,7 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         painter.setPen(QColor(255, 255, 255, 240))
-        painter.setFont(QFont("Comic Sans", 44, QFont.Bold))
+        painter.setFont(QFont("Liberation Sans", 44, QFont.Bold))
 
         if p.type in ("inhale", "exhale"):
             text = str(p.cycle_remaining)
@@ -451,7 +452,7 @@ class BreathingWidget(QWidget):
         #     fade = 1.0 - min(self.t / p.duration, 1.0)
         #     label_alpha = int(230 * fade)
 
-        painter.setFont(QFont("Arial", 32, QFont.Bold))
+        painter.setFont(QFont("Liberation Sans", 32, QFont.Bold))
 
         painter.drawText(
             QRectF(0, self.height() * 0.15, self.width(), 100), Qt.AlignHCenter, p.label
@@ -462,7 +463,7 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         painter.setFont(QFont("Sans-serif", 16, QFont.Medium))
-        painter.setPen(QColor(0x0C, 0x14, 0x55, 200))
+        painter.setPen(QColor(0x1C, 0x24, 0x65, 200))
 
         mute_text = "M to mute" if not self.muted else "M to unmute"
 
@@ -686,7 +687,8 @@ class BreathingWidget(QWidget):
         # progress fill
         # ====================================================
 
-        painter.setBrush(QColor(120, 220, 255, 90))
+        # painter.setBrush(QColor(120, 220, 255, 90))
+        painter.setBrush(QColor(0x5C, 0x14, 0x5C, 128))
 
         painter.drawRoundedRect(fill_rect, radius, radius)
 
@@ -694,7 +696,9 @@ class BreathingWidget(QWidget):
         # subtle glow
         # ====================================================
 
-        glow_pen = QPen(QColor(120, 220, 255, 40))
+        # glow_pen = QPen(QColor(120, 220, 255, 40))
+        glow_pen = QPen(QColor(0x5C, 0x14, 0x5C, 40))
+
         glow_pen.setWidth(10)
 
         painter.setPen(glow_pen)
@@ -722,7 +726,7 @@ class BreathingWidget(QWidget):
             active = progress >= marker_progress
 
             if active:
-                color = QColor(220, 240, 255, 180)
+                color = QColor(220, 240, 255, 100)
                 size = 10
             else:
                 color = QColor(255, 255, 255, 70)

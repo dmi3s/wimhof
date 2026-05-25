@@ -64,6 +64,7 @@ wimhof
 │   └── wimhof
 │       ├── assets
 │       │   ├── __init__.py
+│       │   ├── app_icon.jpg
 │       │   ├── background.jpg
 │       │   └── music.mp3
 │       ├── __init__.py
