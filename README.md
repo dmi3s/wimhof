@@ -56,19 +56,21 @@ Each round consists of:
 
 ```text
 wimhof
-├── assets
-│   ├── background.jpg
-│   └── music.mp3
 ├── demo
+│   ├── demo-v.0.1.0-preview.jpg
 │   ├── demo-v.0.1.0.png
 │   └── demo-v.0.1.0.webm
 ├── src
 │   └── wimhof
+│       ├── assets
+│       │   ├── __init__.py
+│       │   ├── background.jpg
+│       │   └── music.mp3
 │       ├── __init__.py
+│       ├── config.yaml
 │       └── main.py
 ├── .gitignore
 ├── .gitattributes
-├── config.yaml
 ├── pyproject.toml
 ├── README.md
 └── uv.lock
@@ -164,7 +166,7 @@ This application is designed for controlled breathing practice and relaxation.
 
 Background image and music are used under free licenses:
 
-Full attribution information is available in [assets/sources.md](assets/sources.md).
+Full attribution information is available in [src/wimhofassets/sources.md](src/wimhof/assets/sources.md).
 
 ## 🧩 Dependencies
 
@@ -188,6 +190,6 @@ dependencies = [
 
 ## 📄 License
 
-[WTFPL 2.0](https://www.wtfpl.net/)
+[MIT](LICENSE)
 
-© May 2026 dmi3s & ChatGPT
+© May 2026 dmi3s. Built with assistance from ChatGPT.

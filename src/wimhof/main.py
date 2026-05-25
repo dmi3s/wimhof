@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import sys
 from dataclasses import dataclass
-from pathlib import Path
+from importlib.resources import files
 
 import yaml
 from PySide6.QtCore import (
@@ -24,7 +24,7 @@ from PySide6.QtGui import (
     QPixmap,
 )
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
-from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QWidget
 
 
 class QTimerWithPause(QTimer):
@@ -248,7 +248,8 @@ class BreathingWidget(QWidget):
 
         self.radius = self.MIN_R
 
-        self.bg = QPixmap("assets/background.jpg")
+        bg_path = files("wimhof.assets").joinpath("background.jpg")
+        self.bg = QPixmap(str(bg_path))
 
         self.timer = QTimerWithPause(self)
         self.timer.timeout.connect(self.tick)
@@ -262,7 +263,7 @@ class BreathingWidget(QWidget):
         self.player = QMediaPlayer()
         self.player.setAudioOutput(self.audio_output)
 
-        music_path = Path("assets/music.mp3").resolve()
+        music_path = files("wimhof.assets").joinpath("music.mp3")
         self.player.setSource(QUrl.fromLocalFile(str(music_path)))
 
         self.player.setLoops(QMediaPlayer.Loops.Infinite)
@@ -443,11 +444,11 @@ class BreathingWidget(QWidget):
         # LABEL
         # ====================================================
 
-        label_alpha = 230
+        # label_alpha = 230
 
-        if p.type == "relax_countdown":
-            fade = 1.0 - min(self.t / p.duration, 1.0)
-            label_alpha = int(230 * fade)
+        # if p.type == "relax_countdown":
+        #     fade = 1.0 - min(self.t / p.duration, 1.0)
+        #     label_alpha = int(230 * fade)
 
         painter.setFont(QFont("Arial", 32, QFont.Bold))
 
@@ -803,7 +804,9 @@ class BreathingWidget(QWidget):
 def main():
     app = QApplication(sys.argv)
 
-    w = BreathingWidget("config.yaml")
+    config_path = files("wimhof") / "config.yaml"
+    w = BreathingWidget(str(config_path))
+
     app.installEventFilter(w)
 
     w.show()

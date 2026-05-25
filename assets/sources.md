@@ -1,5 +1,0 @@
-### Media sources:
-
-- [background.jpg](background.jpg) :[A tranquil ocean horizon view with soft pastel skies during sunset](https://www.pexels.com/photo/scenic-view-of-the-sea-during-sunset-10939088/) by [Alexey Demidov](https://www.pexels.com/@alexeydemidov/)
--
-- [music.mp3](music.mp3) : [Code Switch](https://www.chosic.com/download-audio/59606/) Artist: [Punch Deck](https://www.chosic.com/free-music/all/?keyword=Punch%20Deck&artist)

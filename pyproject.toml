@@ -20,6 +20,26 @@ wimhof = "wimhof.main:main"
 name = "Sergey (dmi3s) Dmitriev"
 email = "dmi3evsv@gmail.com"
 
-[[project.authors]]
-name = "ChatGPT"
+[tool.hatch.build.targets.wheel]
+packages = ["src/wimhof"]
 
+[tool.hatch.build]
+include = [
+  "src/wimhof/*.py",
+  "src/wimhof/assets/*",
+  "src/wimhof/config.yaml",
+  "demo/demo-v.0.1.0-preview.jpg",
+  "README.md",
+  "LICENSE",
+  ".gitignore",
+  ".gitattributes",
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved",
+  "Operating System :: OS Independent",
+  "Topic :: Multimedia :: Sound/Audio",
+  "Topic :: Artistic Software",
+]
