@@ -18,6 +18,7 @@ from PySide6.QtCore import (
 from PySide6.QtGui import (
     QColor,
     QFont,
+    QIcon,
     QKeyEvent,
     QPainter,
     QPen,
@@ -803,6 +804,9 @@ class BreathingWidget(QWidget):
 
 def main():
     app = QApplication(sys.argv)
+
+    icon_path = files("wimhof") / "assets" / "app_icon.png"
+    app.setWindowIcon(QIcon(str(icon_path)))
 
     config_path = files("wimhof") / "config.yaml"
     w = BreathingWidget(str(config_path))
