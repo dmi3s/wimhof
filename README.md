@@ -46,11 +46,11 @@ Each round consists of:
 
 ---
 
-## 🎬🖥️ Demo
+## 🖥️🎬 Demo
 
-![demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (6.4 Mb)
+![demo/demo-v.0.1.0.png](demo/demo-v.0.1.0.png)
 
----
+##### [demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (6.4 Mb)
 
 ## 📁 Project Structure
 
@@ -58,18 +58,20 @@ Each round consists of:
 wimhof
 ├── assets
 │   ├── background.jpg
-│   ├── music.mp3
-│   ├── screenshot.png
-├── config.yaml
-├── pyproject.toml
-├── README.md
+│   └── music.mp3
+├── demo
+│   ├── demo-v.0.1.0.png
+│   └── demo-v.0.1.0.webm
 ├── src
 │   └── wimhof
 │       ├── __init__.py
 │       └── main.py
 ├── .gitignore
 ├── .gitattributes
-├── uv.lock
+├── config.yaml
+├── pyproject.toml
+├── README.md
+└── uv.lock
 
 ```
 
