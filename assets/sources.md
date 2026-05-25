@@ -1,4 +1,5 @@
 ### Media sources:
 
-- [background.jpg](https://www.pexels.com/search/relaxing%20desktop%20wallpaper/) by [Solvej Nielsen](https://www.pexels.com/@solvej-nielsen-64837698/)
-- [music.mp3](https://www.chosic.com/download-audio/59361/) by [Alex-Productions](https://www.chosic.com/free-music/all/?keyword=Alex-Productions&artist)
+- [background.jpg](background.jpg) :[A tranquil ocean horizon view with soft pastel skies during sunset](https://www.pexels.com/photo/scenic-view-of-the-sea-during-sunset-10939088/) by [Alexey Demidov](https://www.pexels.com/@alexeydemidov/)
+-
+- [music.mp3](music.mp3) : [Code Switch](https://www.chosic.com/download-audio/59606/) Artist: [Punch Deck](https://www.chosic.com/free-music/all/?keyword=Punch%20Deck&artist)

@@ -4,6 +4,7 @@ background_music: assets/music.mp3
 rounds:
   - name: "Round 1"
     repetitions: 30
+
     prepare:
       duration: 3.0
       label: "GET READY"

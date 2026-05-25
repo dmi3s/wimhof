@@ -1,6 +1,6 @@
 # Wim Hof Breathing Trainer
 
-_Atmospheric desktop breathing trainer.Inspired by the Wim Hof breathing method._
+_Atmospheric desktop breathing trainer. Inspired by the Wim Hof breathing method._
 
 Built with PySide6 and YAML-driven session configuration, featuring smooth animations, ambient visuals, and structured breathing rounds.
 
@@ -50,7 +50,7 @@ Each round consists of:
 
 ![demo/demo-v.0.1.0.png](demo/demo-v.0.1.0.png)
 
-##### [demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (6.4 Mb)
+##### [demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (1.1 Mb)
 
 ## 📁 Project Structure
 
