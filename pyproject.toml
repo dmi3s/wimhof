@@ -23,6 +23,14 @@ email = "dmi3evsv@gmail.com"
 [tool.hatch.build.targets.wheel]
 packages = ["src/wimhof"]
 
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+    "mypy>=2.1.0",
+    "ruff>=0.15.14",
+    "tool>=0.8.0",
+]
+
 [tool.hatch.build]
 include = [
   "src/wimhof/*.py",
