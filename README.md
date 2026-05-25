@@ -66,6 +66,7 @@ wimhof
 │       │   ├── __init__.py
 │       │   ├── app_icon.jpg
 │       │   ├── background.jpg
+│       │   ├── sources.md
 │       │   └── music.mp3
 │       ├── __init__.py
 │       ├── config.yaml
@@ -167,7 +168,7 @@ This application is designed for controlled breathing practice and relaxation.
 
 Background image and music are used under free licenses:
 
-Full attribution information is available in [src/wimhofassets/sources.md](src/wimhof/assets/sources.md).
+Full attribution information is available in [src/wimhof/assets/sources.md](src/wimhof/assets/sources.md).
 
 ## 🧩 Dependencies
 
@@ -193,4 +194,7 @@ dependencies = [
 
 [MIT](LICENSE)
 
-© May 2026 dmi3s. Built with assistance from ChatGPT.
+---
+
+© May 2026 by dmi3s.<br/>
+Built with assistance from ChatGPT.
