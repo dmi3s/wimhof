@@ -48,7 +48,7 @@ Each round consists of:
 
 ## 🖥️🎬 Demo
 
-![demo/demo-v.0.1.0.png](demo/demo-v.0.1.0.jpg)
+![demo/demo-v.0.1.0-preview.png](demo/demo-v.0.1.0.jpg)
 
 ##### [demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (1.1 Mb)
 
