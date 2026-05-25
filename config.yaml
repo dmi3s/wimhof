@@ -3,7 +3,7 @@ background_music: assets/music.mp3
 
 rounds:
   - name: "Round 1"
-    repetitions: 2
+    repetitions: 30
     prepare:
       duration: 3.0
       label: "GET READY"
@@ -17,7 +17,7 @@ rounds:
       label: "EXHALE"
 
     hold:
-      duration: 5.0
+      duration: 60.0
       label: "HOLD"
 
     deep_inhale:
@@ -25,17 +25,15 @@ rounds:
       label: "DEEP INHALE"
 
     final_hold:
-      duration: 3.0
+      duration: 15.0
       label: "HOLD"
 
     relax_countdown:
-      duration: 5.0
+      duration: 3.0
       label: "RELAX"
 
   - name: "Round 2"
-    repetitions: 1
     inherit: true
 
   - name: "Round 3"
-    repetitions: 1
     inherit: true

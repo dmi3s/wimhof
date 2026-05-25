@@ -46,9 +46,9 @@ Each round consists of:
 
 ---
 
-## 🎬🖥️ Demo video
+## 🎬🖥️ Demo
 
-<video src="demo/demo-v.0.1.0.webm" autoplay loop muted></video>
+![demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (6.4 Mb)
 
 ---
 
