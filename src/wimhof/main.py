@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import math
 import sys
 from dataclasses import dataclass
@@ -81,7 +82,42 @@ class Phase:
     cycle_total: int = 0
 
 # ============================================================
-# CONFIG
+# LOAD CONFIG HELPER
+# ============================================================
+
+def merge_round(base: dict, override: dict) -> dict:
+    result = deepcopy(base)
+
+    for key, value in override.items():
+
+        if key == "inherit":
+            continue
+
+        elif key == "sequence":
+            merged_sequence = []
+
+            base_sequence = result.get("sequence", [])
+
+            for i, item in enumerate(value):
+                if i < len(base_sequence):
+                    merged_item = {
+                        **base_sequence[i],
+                        **item,
+                    }
+                else:
+                    merged_item = item
+
+                merged_sequence.append(merged_item)
+
+            result["sequence"] = merged_sequence
+
+        else:
+            result[key] = value
+
+    return result
+
+# ============================================================
+# LOAD CONFIG
 # ============================================================
 
 def load_config(path: str) -> tuple[dict, list[Phase]]:
@@ -94,12 +130,25 @@ def load_config(path: str) -> tuple[dict, list[Phase]]:
 
     total_rounds = len(rounds)
 
+    base_round : dict | None= None
+
     for ri, round_cfg in enumerate(rounds):
-        repeat = round_cfg.get("repeat", 1)
 
-        section = round_cfg.get("section", "default")
+        if round_cfg.get("inherit", False):
+            if base_round is None:
+                raise ValueError(...)
 
-        sequence = round_cfg["sequence"]
+            cfg = merge_round(base_round, round_cfg)
+
+        else:
+            cfg = deepcopy(round_cfg)
+
+        base_round = cfg
+        repeat = cfg.get("repeat", 1)
+
+        section = cfg.get("section", "default")
+
+        sequence = cfg["sequence"]
 
         for cycle in range(repeat):
             remaining = repeat - cycle

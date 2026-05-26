@@ -47,32 +47,21 @@ rounds:
         label: "HOLD"
 
   - section: breathing
-
     repeat: 6
+    inherit: true
 
     sequence:
+
       - type: inhale
-        behavior: expand
-        duration: 4
-        label: "INHALE"
         display: "cycles"
 
       - type: hold
-        behavior: pulse_small
-        duration: 4
-        label: "HOLD"
         display: "cycles"
 
       - type: exhale
-        behavior: shrink
-        duration: 4
-        label: "EXHALE"
         display: "cycles"
 
       - type: hold
-        behavior: pulse_small
-        duration: 4
-        label: "HOLD"
         display: "cycles"
 
 

@@ -9,8 +9,8 @@ rounds:
   # ==========================================================
 
   - section: Preparation
-
     repeat: 1
+
     sequence:
       - type: prepare
         behavior: prepare
@@ -22,7 +22,6 @@ rounds:
   # ==========================================================
 
   - section: breathing
-
     repeat: 2
 
     sequence:
@@ -42,26 +41,17 @@ rounds:
         label: "EXHALE"
 
   - section: breathing
-
     repeat: 6
+    inherit: true
 
     sequence:
       - type: inhale
-        behavior: expand
-        duration: 4
-        label: "INHALE"
         display: "cycles"
 
       - type: hold
-        behavior: pulse_small
-        duration: 7
-        label: "HOLD"
         display: "cycles"
 
       - type: exhale
-        behavior: shrink
-        duration: 8
-        label: "EXHALE"
         display: "cycles"
 
   # ==========================================================
