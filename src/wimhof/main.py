@@ -179,6 +179,7 @@ class BreathingWidget(QWidget):
         self.base_radius = self.MIN_R
         self.pulse_radius = 0
         self.radius = self.MIN_R
+        self.phase_start_radius = self.MIN_R
 
         # ====================================================
         # BACKGROUND
@@ -187,6 +188,14 @@ class BreathingWidget(QWidget):
         bg_path = files("wimhof").joinpath(cfg["background_image"])
 
         self.bg = QPixmap(str(bg_path))
+
+        # ====================================================
+        # FINISHING
+        # ====================================================
+
+        self.finishing = False
+        self.finish_t = 0.0
+        self.finish_duration = 6.0
 
         # ====================================================
         # TIMER
@@ -229,10 +238,50 @@ class BreathingWidget(QWidget):
     def next(self):
         self.index += 1
 
+        self.phase_start_radius = self.base_radius
         self.t = 0.0
 
         if self.index >= len(self.phases):
             self.index = len(self.phases) - 1
+
+            self.finishing = True
+
+            self.finish_t = 0.0
+
+    # --------------------------------------------------------
+
+    def finish_tick(self):
+        dt = 0.016
+
+        self.finish_t += dt
+
+        progress = min(
+            self.finish_t / self.finish_duration,
+            1.0,
+            )
+
+        progress = ease(progress)
+
+        # ====================================================
+        # audio fade
+        # ====================================================
+
+        volume = 0.4 * (1.0 - progress)
+
+        self.audio_output.setVolume(volume)
+
+        # ====================================================
+        # ring dissolve
+        # ====================================================
+
+        self.pulse_radius *= 0.96
+
+        # ====================================================
+        # completed
+        # ====================================================
+
+        if progress >= 1.0:
+            self.finishing = False
 
             self.completed = True
 
@@ -240,9 +289,16 @@ class BreathingWidget(QWidget):
 
             self.player.stop()
 
+        self.update()
+
     # --------------------------------------------------------
 
     def tick(self):
+
+        if self.finishing:
+            self.finish_tick()
+            return
+
         dt = 0.016
 
         self.t += dt
@@ -266,13 +322,20 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         if p.behavior == "expand":
-            self.base_radius = self.MIN_R + (self.MAX_R - self.MIN_R) * progress
+            target = self.MAX_R
+            # self.base_radius = self.MIN_R + (self.MAX_R - self.MIN_R) * progress
+            
+            self.base_radius = (
+                self.phase_start_radius + (target - self.phase_start_radius) * progress
+            )
 
         elif p.behavior == "shrink":
-            self.base_radius = self.MAX_R - (self.MAX_R - self.MIN_R) * progress
+            target = self.MIN_R
+            self.base_radius = self.phase_start_radius - (self.phase_start_radius - target) * progress
 
         elif p.behavior == "expand_big":
-            self.base_radius = self.MIN_R + (above_max - self.MIN_R) * progress
+            target = above_max
+            self.base_radius = self.phase_start_radius + (target - self.phase_start_radius) * progress
 
         elif p.behavior == "hold":
             pass
@@ -281,9 +344,9 @@ class BreathingWidget(QWidget):
             self.base_radius = above_max
 
         elif p.behavior == "prepare":
-            start_r = self.MAX_R * 0.9
-
-            self.base_radius = start_r - (start_r - self.MIN_R) * progress
+            # start_r = self.MAX_R * 0.9
+            target = self.MIN_R
+            self.base_radius = self.phase_start_radius - (self.phase_start_radius - target) * progress
 
         elif p.behavior == "fade_out":
             self.base_radius = (
@@ -352,10 +415,11 @@ class BreathingWidget(QWidget):
 
             overlay_alpha = int(140 * ease(fade))
 
-        painter.fillRect(
-            self.rect(),
-            QColor(0, 0, 0, overlay_alpha),
-        )
+        if not self.finishing:
+            painter.fillRect(
+                self.rect(),
+                QColor(0, 0, 0, overlay_alpha),
+            )
 
         # ====================================================
         # TIMELINE
@@ -375,12 +439,12 @@ class BreathingWidget(QWidget):
 
         # painter.drawText(
         #     self.rect().adjusted(space, space, -space, -space),
-        #     Qt.AlignTop | Qt.AlignHCenter,
+        #     Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter,
         #     f"Round {p.round_index}/{p.round_total}",
         # )
         painter.drawText(
             self.rect().adjusted(space, space, -space, -space),
-            Qt.AlignTop | Qt.AlignHCenter,
+            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter,
             p.section,
         )
 
@@ -388,36 +452,36 @@ class BreathingWidget(QWidget):
         # CENTER TEXT
         # ====================================================
 
-        if p.display == "cycles":
-            painter.setPen(QColor(120, 220, 255, 220))
+        # if not self.finishing and not self.completed:
+        if not self.completed:
+            if p.display == "cycles":
+                painter.setPen(QColor(120, 220, 255, 220))
+                painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 38, QFont.Weight.Bold))
 
-            painter.setFont(QFont("Liberation Sans", 38, QFont.Bold))
+            elif p.display == "countdown":
+                painter.setPen(QColor(255, 255, 255, 240))
+                painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 44, QFont.Weight.Bold))
 
-        elif p.display == "countdown":
-            painter.setPen(QColor(255, 255, 255, 240))
+            else:
+                painter.setPen(QColor(255, 255, 255, 180))
+                painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 40))
 
-            painter.setFont(QFont("Liberation Sans", 44, QFont.Bold))
+            if p.display == "cycles":
+                text = str(p.cycle_remaining)
 
-        else:
-            painter.setPen(QColor(255, 255, 255, 180))
+            elif p.display == "countdown":
+                text = str(max(0, math.ceil(p.duration - self.t)))
 
-            painter.setFont(QFont("Liberation Sans", 40))
+            else:
+                text = ""
 
-        if p.display == "cycles":
-            text = str(p.cycle_remaining)
+            painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, text)
 
-        elif p.display == "countdown":
-            text = str(max(0, math.ceil(p.duration - self.t)))
-
-        else:
-            text = ""
-
-        painter.drawText(self.rect(), Qt.AlignCenter, text)
         # ====================================================
         # LABEL
         # ====================================================
 
-        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 32, QFont.Bold))
+        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 32, QFont.Weight.Bold))
 
         painter.drawText(
             QRectF(
@@ -426,7 +490,7 @@ class BreathingWidget(QWidget):
                 self.width(),
                 100,
             ),
-            Qt.AlignHCenter,
+            Qt.AlignmentFlag.AlignHCenter,
             p.label,
         )
 
@@ -441,7 +505,7 @@ class BreathingWidget(QWidget):
 
         painter.drawText(
             self.rect().adjusted(space, space, -space, -space),
-            Qt.AlignTop | Qt.AlignLeft,
+            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft,
             f"Q or Esc to quit\nSpace to pause\n{mute_text}",
         )
 
@@ -451,30 +515,49 @@ class BreathingWidget(QWidget):
 
         self.draw_ring(painter, cx, cy)
 
+        # ====================================================
+        # PAUSE / FINISHING
+        # ====================================================
 
         if self.paused:
-            self.draw_shadow(painter,"Paused", "Press Space to continue")
-
+            self.draw_shadow(painter,"Paused", "Press Space to continue", 220)
+        elif self.finishing:
+            self.draw_completion_overlay(painter, 220)
         elif self.completed:
-            self.draw_shadow(painter,"Completed", "Have a nice day!")
+            self.draw_shadow(painter, "Completed", "Have a nice day!", 220)
 
         painter.end()
 
-    def draw_shadow(self, painter: QPainter, main_text: str, what_to_do: str, shadow_alpha = 180):
+    # --------------------------------------------------------
+
+    def draw_completion_overlay(self, painter, alpha = 220):
+
+        progress = min(
+            self.finish_t / self.finish_duration,
+            1.0,
+        )
+
+        progress_alpha = min( int((alpha+10) * progress), alpha)
+
+        self.draw_shadow(painter, "Completed", "Have a nice day!", progress_alpha)
+
+    # --------------------------------------------------------
+
+    def draw_shadow(self, painter: QPainter, main_text: str, supplementary: str, shadow_alpha: int = 220):
         painter.fillRect(self.rect(), QColor(0, 0, 0, shadow_alpha))
 
-        painter.setPen(QColor(255, 255, 255))
+        painter.setPen(QColor(255, 255, 255, shadow_alpha))
 
-        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 56, QFont.Bold))
+        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 56, QFont.Weight.Bold))
 
-        painter.drawText(self.rect(), Qt.AlignCenter, main_text)
+        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, main_text)
 
         painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 22))
 
         painter.drawText(
             self.rect().adjusted(0, 180, 0, 0),
-            Qt.AlignCenter,
-            what_to_do,
+            Qt.AlignmentFlag.AlignCenter,
+            supplementary,
         )
 
     # --------------------------------------------------------
