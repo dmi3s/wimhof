@@ -2,7 +2,6 @@ background_image: assets/background.jpg
 background_music: assets/music.mp3
 
 rounds:
-
   # ==========================================================
   # PREPARATION
   # ==========================================================
@@ -20,48 +19,26 @@ rounds:
   # BREATHING
   # ==========================================================
 
-  - section: Breathing
+  - section: breathing
 
-#    repeat: 30
-    repeat: 2
+    repeat: 1
+#    repeat: 8
 
     sequence:
       - type: inhale
         behavior: expand
-        duration: 2.2
+        duration: 4
         label: "INHALE"
-        display: "cycles"
+
+      - type: hold
+        behavior: pulse_small
+        duration: 7
+        label: "HOLD"
 
       - type: exhale
         behavior: shrink
-        duration: 2.2
+        duration: 8
         label: "EXHALE"
-        display: "cycles"
-
-  # ==========================================================
-  # HOLD
-  # ==========================================================
-
-  - section: Hold
-    repeat: 1
-
-    sequence:
-      - type: hold
-        behavior: pulse_small
-#        duration: 60
-        duration: 3
-        label: "HOLD"
-
-      - type: deep_inhale
-        behavior: expand_big
-        duration: 3
-        label: "DEEP INHALE"
-
-      - type: final_hold
-        behavior: pulse_large
-#        duration: 15
-        duration: 3
-        label: "HOLD"
 
   # ==========================================================
   # RECOVERY

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import math
 import sys
 from dataclasses import dataclass
@@ -9,7 +10,6 @@ import yaml
 from PySide6.QtCore import (
     QEasingCurve,
     QEvent,
-    QObject,
     QRectF,
     Qt,
     QTimer,
@@ -27,12 +27,25 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QApplication, QWidget
 
+# _HINTS_FONT_NAME = "Sans-serif"
+_HINTS_FONT_NAME = "Monospace"
+
+# _APP_DEFAULT_FONT_NAME = "Liberation Sans"
+_APP_DEFAULT_FONT_NAME = "Sans"
+
+
+# ============================================================
+# TIMER
+# ============================================================
+
 
 class QTimerWithPause(QTimer):
     def __init__(self, parent=None, interval=0, singleShot=False):
         super().__init__(parent)
+
         self.setInterval(interval)
         self.setSingleShot(singleShot)
+
         self.remaining = 0
 
     def pause(self):
@@ -50,158 +63,68 @@ class QTimerWithPause(QTimer):
 # DATA MODEL
 # ============================================================
 
-
 @dataclass(slots=True)
 class Phase:
     type: str
+    behavior: str
     duration: float
     label: str
+
+    section: str
+    display: str
+
     round_index: int
     round_total: int
+
+    cycle_index: int = 0
     cycle_remaining: int = 0
     cycle_total: int = 0
 
-
 # ============================================================
-# CONFIG LOADER
+# CONFIG
 # ============================================================
 
-
-def load_config(path: str) -> list[Phase]:
+def load_config(path: str) -> tuple[dict, list[Phase]]:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
     rounds = data["rounds"]
-    total_rounds = len(rounds)
 
     phases: list[Phase] = []
 
-    base_round = None
+    total_rounds = len(rounds)
 
-    for ri, r in enumerate(rounds):
-        # ====================================================
-        # inherit safe merge
-        # ====================================================
+    for ri, round_cfg in enumerate(rounds):
+        repeat = round_cfg.get("repeat", 1)
 
-        if r.get("inherit", False):
-            if base_round is None:
-                raise ValueError(f"Round {ri + 1}: inherit without base round")
+        section = round_cfg.get("section", "default")
 
-            cfg = {**base_round, **{k: v for k, v in r.items() if k != "inherit"}}
-        else:
-            cfg = r
-            base_round = r
+        sequence = round_cfg["sequence"]
 
-        reps = cfg["repetitions"]
+        for cycle in range(repeat):
+            remaining = repeat - cycle
 
-        prepare = cfg.get("prepare", {})
-        inhale = cfg["inhale"]
-        exhale = cfg["exhale"]
+            for item in sequence:
+                phases.append(
+                    Phase(
+                        type=item["type"],
+                        behavior=item["behavior"],
+                        duration=item["duration"],
+                        label=item["label"],
 
-        # ====================================================
-        # 1. PREPARE PHASE
-        # ====================================================
+                        section=section,
+                        display=item.get("display", "countdown"),
 
-        if prepare:
-            phases.append(
-                Phase(
-                    type="prepare",
-                    duration=prepare["duration"],
-                    label=prepare["label"],
-                    round_index=ri + 1,
-                    round_total=total_rounds,
+                        round_index=ri + 1,
+                        round_total=total_rounds,
+
+                        cycle_index=cycle + 1,
+                        cycle_remaining=remaining,
+                        cycle_total=repeat,
+                    )
                 )
-            )
 
-        # ====================================================
-        # 1. BREATHING CYCLES
-        # ====================================================
-
-        for i in range(reps):
-            remaining = reps - i
-
-            phases.append(
-                Phase(
-                    type="inhale",
-                    duration=inhale["duration"],
-                    label=inhale["label"],
-                    round_index=ri + 1,
-                    round_total=total_rounds,
-                    cycle_remaining=remaining,
-                    cycle_total=reps,
-                )
-            )
-
-            phases.append(
-                Phase(
-                    type="exhale",
-                    duration=exhale["duration"],
-                    label=exhale["label"],
-                    round_index=ri + 1,
-                    round_total=total_rounds,
-                    cycle_remaining=remaining,
-                    cycle_total=reps,
-                )
-            )
-
-        # ====================================================
-        # 2. HOLD (LONG BEFORE BREATHWORK BREAK)
-        # ====================================================
-
-        phases.append(
-            Phase(
-                type="hold",
-                duration=cfg["hold"]["duration"],
-                label=cfg["hold"]["label"],
-                round_index=ri + 1,
-                round_total=total_rounds,
-            )
-        )
-
-        # ====================================================
-        # 3. DEEP INHALE
-        # ====================================================
-
-        phases.append(
-            Phase(
-                type="deep_inhale",
-                duration=cfg["deep_inhale"]["duration"],
-                label=cfg["deep_inhale"]["label"],
-                round_index=ri + 1,
-                round_total=total_rounds,
-            )
-        )
-
-        # ====================================================
-        # 4. FINAL HOLD (POST BREATHWORK)
-        # ====================================================
-
-        phases.append(
-            Phase(
-                type="final_hold",
-                duration=cfg["final_hold"]["duration"],
-                label=cfg["final_hold"]["label"],
-                round_index=ri + 1,
-                round_total=total_rounds,
-            )
-        )
-
-        # ====================================================
-        # 5. RELAX COUNTDOWN (NO RING)
-        # ====================================================
-
-        phases.append(
-            Phase(
-                type="relax_countdown",
-                duration=cfg["relax_countdown"]["duration"],
-                label=cfg["relax_countdown"]["label"],
-                round_index=ri + 1,
-                round_total=total_rounds,
-            )
-        )
-
-    return phases
-
+    return data, phases
 
 # ============================================================
 # EASING
@@ -224,7 +147,8 @@ class BreathingWidget(QWidget):
     def __init__(self, config_path: str):
         super().__init__()
 
-        self.setWindowTitle("Wim Hof Breathing")
+        self.setWindowTitle("Breathing Trainer")
+
         self.setWindowFlags(Qt.FramelessWindowHint)
 
         self.paused = False
@@ -233,7 +157,8 @@ class BreathingWidget(QWidget):
 
         self.showFullScreen()
 
-        self.phases = load_config(config_path)
+        cfg, self.phases = load_config(config_path)
+
         self.index = 0
         self.t = 0.0
 
@@ -247,31 +172,51 @@ class BreathingWidget(QWidget):
             self.phase_start_times.append(acc)
             acc += ph.duration
 
+        # ====================================================
+        # CIRCLE RADIUS ANIMATION
+        # ====================================================
+
+        self.base_radius = self.MIN_R
+        self.pulse_radius = 0
         self.radius = self.MIN_R
 
-        bg_path = files("wimhof.assets").joinpath("background.jpg")
+        # ====================================================
+        # BACKGROUND
+        # ====================================================
+
+        bg_path = files("wimhof").joinpath(cfg["background_image"])
+
         self.bg = QPixmap(str(bg_path))
 
+        # ====================================================
+        # TIMER
+        # ====================================================
+
         self.timer = QTimerWithPause(self)
+
         self.timer.timeout.connect(self.tick)
+
         self.timer.start(16)
 
-        # Music
-        # keep references (IMPORTANT)
+        # ====================================================
+        # MUSIC
+        # ====================================================
+
         self.audio_output = QAudioOutput()
+
         self.audio_output.setVolume(0.4)
 
         self.player = QMediaPlayer()
+
         self.player.setAudioOutput(self.audio_output)
 
-        music_path = files("wimhof.assets").joinpath("music.mp3")
+        music_path = files("wimhof").joinpath(cfg["background_music"])
+
         self.player.setSource(QUrl.fromLocalFile(str(music_path)))
 
         self.player.setLoops(QMediaPlayer.Loops.Infinite)
-        self.player.play()
 
-        print(self.player.mediaStatus())
-        print(self.player.errorString())
+        self.player.play()
 
     # --------------------------------------------------------
 
@@ -283,6 +228,7 @@ class BreathingWidget(QWidget):
 
     def next(self):
         self.index += 1
+
         self.t = 0.0
 
         if self.index >= len(self.phases):
@@ -291,51 +237,72 @@ class BreathingWidget(QWidget):
             self.completed = True
 
             self.timer.stop()
-            self.player.stop()
 
-            return
+            self.player.stop()
 
     # --------------------------------------------------------
 
     def tick(self):
         dt = 0.016
+
         self.t += dt
 
         p = self.phase
+
         progress = min(self.t / p.duration, 1.0)
+
         progress = ease(progress)
 
-        above_max = self.MAX_R * 1.25  # <- немного "выше нормы"
+        above_max = self.MAX_R * 1.25
 
-        if p.type == "inhale":
-            self.radius = self.MIN_R + (self.MAX_R - self.MIN_R) * progress
+        # ====================================================
+        # reset pulse
+        # ====================================================
 
-        elif p.type == "exhale":
-            self.radius = self.MAX_R - (self.MAX_R - self.MIN_R) * progress
+        self.pulse_radius = 0
 
-        elif p.type == "deep_inhale":
-            base = self.MIN_R
-            deep_max = above_max
+        # ====================================================
+        # behavior engine
+        # ====================================================
 
-            self.radius = base + (deep_max - base) * progress
+        if p.behavior == "expand":
+            self.base_radius = self.MIN_R + (self.MAX_R - self.MIN_R) * progress
 
-        elif p.type == "hold":
-            pulse = math.sin(self.t * 2.0) * 3.0
-            self.radius = self.MIN_R + pulse
+        elif p.behavior == "shrink":
+            self.base_radius = self.MAX_R - (self.MAX_R - self.MIN_R) * progress
 
-        elif p.type == "final_hold":
-            pulse = math.sin(self.t * 2.0) * 3.0
-            self.radius = above_max + pulse
+        elif p.behavior == "expand_big":
+            self.base_radius = self.MIN_R + (above_max - self.MIN_R) * progress
 
-        elif p.type == "relax_countdown":
-            self.radius = self.radius - (self.radius - self.MAX_R) * progress / 4
-            # was: self.radius = 0
+        elif p.behavior == "hold":
+            pass
 
-        elif p.type == "prepare":
+        elif p.behavior == "hold_big":
+            self.base_radius = above_max
+
+        elif p.behavior == "prepare":
             start_r = self.MAX_R * 0.9
-            end_r = self.MIN_R
 
-            self.radius = start_r - (start_r - end_r) * progress
+            self.base_radius = start_r - (start_r - self.MIN_R) * progress
+
+        elif p.behavior == "fade_out":
+            self.base_radius = (
+                self.base_radius - (self.base_radius - self.MAX_R) * progress / 4
+            )
+
+        # ====================================================
+        # pulse modifiers
+        # ====================================================
+
+        if p.behavior == "pulse_small":
+            self.pulse_radius = math.sin(self.t * 2.0) * 3.0
+
+        elif p.behavior == "pulse_large":
+            self.pulse_radius = math.sin(self.t * 2.0) * 4.0
+
+        # ====================================================
+
+        self.radius = self.base_radius + self.pulse_radius
 
         if self.t >= p.duration:
             self.next()
@@ -343,7 +310,7 @@ class BreathingWidget(QWidget):
         self.update()
 
     # --------------------------------------------------------
-    #
+
     def current_progress(self) -> float:
         if self.completed:
             return 1.0
@@ -358,9 +325,9 @@ class BreathingWidget(QWidget):
 
     def paintEvent(self, _):
         painter = QPainter(self)
+
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # background
         if not self.bg.isNull():
             painter.drawPixmap(self.rect(), self.bg)
 
@@ -370,99 +337,104 @@ class BreathingWidget(QWidget):
         cy = self.height() / 2
 
         # ====================================================
-        # BACKGROUND
+        # OVERLAY
         # ====================================================
 
-        NORMAL_OVERLAY = 140
+        overlay_alpha = 140
 
-        overlay_alpha = NORMAL_OVERLAY
+        if p.behavior == "prepare":
+            fade = ease(min(self.t / p.duration, 1.0))
 
-        # ====================================================
-        # PREPARE -> FADE IN
-        # ====================================================
+            overlay_alpha = int(140 * fade)
 
-        if p.type == "prepare":
-            progress = min(self.t / p.duration, 1.0)
-            progress = ease(progress)
-            overlay_alpha = int(NORMAL_OVERLAY * progress)
-
-        # ====================================================
-        # RELAX -> FADE OUT
-        # ====================================================
-
-        elif p.type == "relax_countdown":
+        elif p.behavior == "fade_out":
             fade = 1.0 - min(self.t / p.duration, 1.0)
-            fade = ease(fade)
-            overlay_alpha = int(NORMAL_OVERLAY * fade)
 
-        painter.fillRect(self.rect(), QColor(0, 0, 0, overlay_alpha))
+            overlay_alpha = int(140 * ease(fade))
+
+        painter.fillRect(
+            self.rect(),
+            QColor(0, 0, 0, overlay_alpha),
+        )
 
         # ====================================================
-        # DRAW TIMELINE
+        # TIMELINE
         # ====================================================
 
         self.draw_timeline(painter)
 
         # ====================================================
-        # ROUND LABEL
+        # ROUND
         # ====================================================
 
-        # painter.setPen(QColor(255, 255, 255, 230))
         painter.setPen(QColor(200, 200, 200, 230))
 
-        painter.setFont(QFont("Liberation Sans", 22, QFont.Bold))
+        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 22, QFont.Bold))
 
         space = 56
 
+        # painter.drawText(
+        #     self.rect().adjusted(space, space, -space, -space),
+        #     Qt.AlignTop | Qt.AlignHCenter,
+        #     f"Round {p.round_index}/{p.round_total}",
+        # )
         painter.drawText(
             self.rect().adjusted(space, space, -space, -space),
             Qt.AlignTop | Qt.AlignHCenter,
-            f"Round {p.round_index}/{p.round_total}",
+            p.section,
         )
 
         # ====================================================
         # CENTER TEXT
         # ====================================================
 
-        painter.setPen(QColor(255, 255, 255, 240))
-        painter.setFont(QFont("Liberation Sans", 44, QFont.Bold))
+        if p.display == "cycles":
+            painter.setPen(QColor(120, 220, 255, 220))
 
-        if p.type in ("inhale", "exhale"):
+            painter.setFont(QFont("Liberation Sans", 38, QFont.Bold))
+
+        elif p.display == "countdown":
+            painter.setPen(QColor(255, 255, 255, 240))
+
+            painter.setFont(QFont("Liberation Sans", 44, QFont.Bold))
+
+        else:
+            painter.setPen(QColor(255, 255, 255, 180))
+
+            painter.setFont(QFont("Liberation Sans", 40))
+
+        if p.display == "cycles":
             text = str(p.cycle_remaining)
 
-        elif p.type in ("hold", "deep_inhale", "final_hold"):
+        elif p.display == "countdown":
             text = str(max(0, math.ceil(p.duration - self.t)))
 
-        elif p.type == "relax_countdown":
-            text = str(max(0, math.ceil(p.duration - self.t)))
-        elif p.type == "prepare":
-            text = str(max(1, math.ceil(p.duration - self.t)))
         else:
             text = ""
 
         painter.drawText(self.rect(), Qt.AlignCenter, text)
-
         # ====================================================
         # LABEL
         # ====================================================
 
-        # label_alpha = 230
-
-        # if p.type == "relax_countdown":
-        #     fade = 1.0 - min(self.t / p.duration, 1.0)
-        #     label_alpha = int(230 * fade)
-
-        painter.setFont(QFont("Liberation Sans", 32, QFont.Bold))
+        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 32, QFont.Bold))
 
         painter.drawText(
-            QRectF(0, self.height() * 0.15, self.width(), 100), Qt.AlignHCenter, p.label
+            QRectF(
+                0,
+                self.height() * 0.15,
+                self.width(),
+                100,
+            ),
+            Qt.AlignHCenter,
+            p.label,
         )
 
         # ====================================================
-        # ESC HINT
+        # KEYBOARD HINTS
         # ====================================================
 
-        painter.setFont(QFont("Sans-serif", 16, QFont.Medium))
+        painter.setFont(QFont(_HINTS_FONT_NAME, 16, QFont.Medium))
         painter.setPen(QColor(0x1C, 0x24, 0x65, 200))
 
         mute_text = "M to mute" if not self.muted else "M to unmute"
@@ -470,188 +442,75 @@ class BreathingWidget(QWidget):
         painter.drawText(
             self.rect().adjusted(space, space, -space, -space),
             Qt.AlignTop | Qt.AlignLeft,
-            f"Q or Esc to exit\nSpace to pause\n{mute_text}",
+            f"Q or Esc to quit\nSpace to pause\n{mute_text}",
         )
 
         # ====================================================
-        # RING ONLY FOR BREATHING
+        # RING
         # ====================================================
 
-        if p.type == "prepare":
-            self.draw_prepare_ring(painter, cx, cy)
+        self.draw_ring(painter, cx, cy)
 
-        elif p.type == "relax_countdown":
-            self.draw_relax_ring(painter, cx, cy)
-
-        else:
-            self.draw_ring(painter, cx, cy)
 
         if self.paused:
-            painter.fillRect(self.rect(), QColor(0, 0, 0, 220))
-
-            painter.setPen(QColor(255, 255, 255))
-
-            painter.setFont(QFont("Arial", 44, QFont.Bold))
-
-            painter.drawText(self.rect(), Qt.AlignCenter, "Press Space to continue")
+            self.draw_shadow(painter,"Paused", "Press Space to continue")
 
         elif self.completed:
-            painter.fillRect(self.rect(), QColor(0, 0, 0, 235))
-
-            painter.setPen(QColor(255, 255, 255))
-
-            painter.setFont(QFont("Arial", 56, QFont.Bold))
-
-            painter.drawText(self.rect(), Qt.AlignCenter, "Completed")
-
-            painter.setFont(QFont("Arial", 22))
-
-            painter.drawText(
-                self.rect().adjusted(0, 140, 0, 0),
-                Qt.AlignCenter,
-                "Press Space to restart",
-            )
+            self.draw_shadow(painter,"Completed", "Have a nice day!")
 
         painter.end()
+
+    def draw_shadow(self, painter: QPainter, main_text: str, what_to_do: str, shadow_alpha = 180):
+        painter.fillRect(self.rect(), QColor(0, 0, 0, shadow_alpha))
+
+        painter.setPen(QColor(255, 255, 255))
+
+        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 56, QFont.Bold))
+
+        painter.drawText(self.rect(), Qt.AlignCenter, main_text)
+
+        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 22))
+
+        painter.drawText(
+            self.rect().adjusted(0, 180, 0, 0),
+            Qt.AlignCenter,
+            what_to_do,
+        )
 
     # --------------------------------------------------------
 
     def draw_ring(self, painter, cx, cy):
         r = self.radius
 
-        # glow
         for i in range(4):
-            pen = QPen(QColor(80, 200, 255, 20 - i * 4))
-            pen.setWidth(18 - i * 3)
-            painter.setPen(pen)
-            painter.setBrush(Qt.NoBrush)
-
-            painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
-
-        # main ring
-        pen = QPen(QColor(120, 220, 255, 140))
-        pen.setWidth(7)
-        pen.setCapStyle(Qt.RoundCap)
-
-        painter.setPen(pen)
-        painter.setBrush(Qt.NoBrush)
-
-        painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
-
-    # --------------------------------------------------------
-
-    def draw_relax_ring(self, painter, cx, cy):
-        r = self.radius
-
-        progress = min(self.t / self.phase.duration, 1.0)
-
-        remaining = 1.0 - progress
-
-        # ====================================================
-        # subtle fading background ring
-        # ====================================================
-
-        bg_alpha = int(40 * remaining)
-
-        bg_pen = QPen(QColor(255, 255, 255, bg_alpha))
-        bg_pen.setWidth(6)
-
-        painter.setPen(bg_pen)
-        painter.setBrush(Qt.NoBrush)
-
-        painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
-
-        # ====================================================
-        # animated disappearing arc
-        # ====================================================
-
-        glow_alpha = int(120 * remaining)
-
-        for i in range(3):
-            pen = QPen(QColor(80, 200, 255, glow_alpha // (i + 2)))
-            pen.setWidth(max(1, 14 - i * 4))
-
-            painter.setPen(pen)
-
-            start_angle = 90 * 16
-            span_angle = -(360 * remaining) * 16
-
-            painter.drawArc(
-                QRectF(cx - r, cy - r, r * 2, r * 2),
-                start_angle,
-                int(span_angle),
+            pen = QPen(
+                QColor(80, 200, 255, 20 - i * 4)
             )
 
-        # ====================================================
-        # main arc
-        # ====================================================
+            pen.setWidth(18 - i * 3)
 
-        main_alpha = int(220 * remaining)
+            painter.setPen(pen)
 
-        pen = QPen(QColor(120, 220, 255, main_alpha))
-        pen.setWidth(max(2, int(8 * remaining)))
+            painter.setBrush(Qt.NoBrush)
+
+            painter.drawEllipse(
+                QRectF(cx - r, cy - r, r * 2, r * 2)
+            )
+
+        pen = QPen(QColor(120, 220, 255, 140))
+
+        pen.setWidth(7)
+
         pen.setCapStyle(Qt.RoundCap)
 
         painter.setPen(pen)
 
-        painter.drawArc(
-            QRectF(cx - r, cy - r, r * 2, r * 2),
-            90 * 16,
-            int(-(360 * remaining) * 16),
+        painter.drawEllipse(
+            QRectF(cx - r, cy - r, r * 2, r * 2)
         )
 
     # --------------------------------------------------------
-
-    def draw_prepare_ring(self, painter, cx, cy):
-        progress = min(self.t / self.phase.duration, 1.0)
-
-        # ====================================================
-        # smooth radius shrink
-        # ====================================================
-
-        # start_r = self.MAX_R * 0.9
-        # end_r = self.MIN_R
-
-        # r = start_r - (start_r - end_r) * progress
-        r = self.radius
-
-        # ====================================================
-        # fade-in alpha
-        # ====================================================
-
-        alpha = int(220 * progress)
-
-        # ====================================================
-        # background ring
-        # ====================================================
-
-        bg_pen = QPen(QColor(255, 255, 255, int(40 * progress)))
-        bg_pen.setWidth(8)
-
-        painter.setPen(bg_pen)
-        painter.setBrush(Qt.NoBrush)
-
-        painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
-
-        # ====================================================
-        # animated arc
-        # ====================================================
-
-        arc_pen = QPen(QColor(120, 220, 255, alpha))
-        arc_pen.setWidth(8)
-        arc_pen.setCapStyle(Qt.RoundCap)
-
-        painter.setPen(arc_pen)
-
-        start_angle = 90 * 16
-        span_angle = -(360 * progress) * 16
-
-        painter.drawArc(
-            QRectF(cx - r, cy - r, r * 2, r * 2),
-            start_angle,
-            int(span_angle),
-        )
-
+    # TIMELINE
     # --------------------------------------------------------
 
     def draw_timeline(self, painter):
@@ -674,7 +533,7 @@ class BreathingWidget(QWidget):
         fill_rect = QRectF(x, y, fill_w, h)
 
         # ====================================================
-        # background bar
+        # background
         # ====================================================
 
         painter.setPen(Qt.NoPen)
@@ -684,55 +543,70 @@ class BreathingWidget(QWidget):
         painter.drawRoundedRect(rect, radius, radius)
 
         # ====================================================
-        # progress fill
+        # fill
         # ====================================================
 
-        # painter.setBrush(QColor(120, 220, 255, 90))
         painter.setBrush(QColor(0x5C, 0x14, 0x5C, 128))
 
         painter.drawRoundedRect(fill_rect, radius, radius)
 
         # ====================================================
-        # subtle glow
+        # glow
         # ====================================================
 
-        # glow_pen = QPen(QColor(120, 220, 255, 40))
         glow_pen = QPen(QColor(0x5C, 0x14, 0x5C, 40))
 
         glow_pen.setWidth(10)
 
         painter.setPen(glow_pen)
+
         painter.setBrush(Qt.NoBrush)
 
         painter.drawRoundedRect(fill_rect, radius, radius)
 
         # ====================================================
-        # round markers only
+        # section transition markers
         # ====================================================
 
-        round_positions = {}
+        transitions = []
 
-        for i, ph in enumerate(self.phases):
-            if ph.round_index not in round_positions:
-                round_positions[ph.round_index] = i
+        acc = 0.0
 
-        total = len(self.phases)
+        prev_section = None
 
-        for _, idx in round_positions.items():
-            marker_progress = idx / max(1, total - 1)
+        for ph in self.phases:
+            section = getattr(ph, "section", None)
+
+            if prev_section is None:
+                prev_section = section
+
+            elif section != prev_section:
+                transitions.append(acc)
+
+                prev_section = section
+
+            acc += ph.duration
+
+        # ====================================================
+        # markers
+        # ====================================================
+
+        for t in transitions:
+            marker_progress = t / self.total_duration
 
             mx = x + w * marker_progress
 
             active = progress >= marker_progress
 
             if active:
-                color = QColor(220, 240, 255, 100)
-                size = 10
+                color = QColor(220, 240, 255, 120)
+                size = 12
             else:
                 color = QColor(255, 255, 255, 70)
-                size = 8
+                size = 10
 
             painter.setPen(Qt.NoPen)
+
             painter.setBrush(color)
 
             painter.drawEllipse(
@@ -746,37 +620,36 @@ class BreathingWidget(QWidget):
 
     # --------------------------------------------------------
 
-    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+    def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.KeyPress:
             key = QKeyEvent(event)
 
             if key.key() in (Qt.Key.Key_Escape, Qt.Key.Key_Q):
                 QApplication.quit()
+
                 return True
 
             elif key.key() == Qt.Key.Key_M:
                 self.muted = not self.muted
 
-                if self.muted and not self.paused and not self.completed:
+                if self.muted:
                     self.player.pause()
                 else:
-                    if not (self.paused or self.completed or self.muted):
+                    if not self.paused and not self.completed:
                         self.player.play()
 
                 return True
 
             elif key.key() == Qt.Key.Key_Space:
-                # ====================================================
-                # completed session restart
-                # ====================================================
-
                 if self.completed:
                     self.completed = False
 
                     self.index = 0
+
                     self.t = 0.0
 
                     self.timer.reset()
+
                     if not self.muted:
                         self.player.play()
 
@@ -784,13 +657,14 @@ class BreathingWidget(QWidget):
                     self.paused = True
 
                     self.timer.pause()
-                    if not self.muted:
-                        self.player.pause()
+
+                    self.player.pause()
 
                 else:
                     self.paused = False
 
                     self.timer.resume()
+
                     if not self.muted:
                         self.player.play()
 
@@ -807,17 +681,40 @@ class BreathingWidget(QWidget):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        help="Path to YAML config",
+    )
+
+    args = parser.parse_args()
+
     app = QApplication(sys.argv)
 
     icon_path = files("wimhof") / "assets" / "app_icon.png"
+
     app.setWindowIcon(QIcon(str(icon_path)))
 
-    config_path = files("wimhof") / "config.yaml"
-    w = BreathingWidget(str(config_path))
+    if args.config:
+        config_path = files("wimhof") / args.config
+    else:
+        config_path = files("wimhof") / "config.yaml"
+
+    try:
+        w = BreathingWidget(str(config_path))
+
+    except Exception as e:
+        print(f"Failed to load config: {e}")
+
+        sys.exit(1)
 
     app.installEventFilter(w)
 
     w.show()
+
     sys.exit(app.exec())
 
 
