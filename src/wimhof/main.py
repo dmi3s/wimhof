@@ -179,7 +179,7 @@ class BreathingWidget(QWidget):
         self.base_radius = self.MIN_R
         self.pulse_radius = 0
         self.radius = self.MIN_R
-        self.phase_start_radius = self.MIN_R
+        self.phase_start_radius = self.MAX_R
 
         # ====================================================
         # BACKGROUND
@@ -238,7 +238,7 @@ class BreathingWidget(QWidget):
     def next(self):
         self.index += 1
 
-        self.phase_start_radius = self.base_radius
+        self.phase_start_radius = self.base_radius + self.pulse_radius
         self.t = 0.0
 
         if self.index >= len(self.phases):
@@ -341,7 +341,6 @@ class BreathingWidget(QWidget):
             self.base_radius = above_max
 
         elif p.behavior == "prepare":
-            # start_r = self.MAX_R * 0.9
             target = self.MIN_R
             self.base_radius = self.phase_start_radius - (self.phase_start_radius - target) * progress
 
@@ -452,7 +451,7 @@ class BreathingWidget(QWidget):
         if not self.finishing and not self.completed:
             if p.display == "cycles":
                 painter.setPen(QColor(120, 220, 255, 220))
-                painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 38, QFont.Weight.Bold))
+                painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 44, QFont.Weight.Bold))
 
             elif p.display == "countdown":
                 painter.setPen(QColor(255, 255, 255, 240))
@@ -478,6 +477,7 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 32, QFont.Weight.Bold))
+        painter.setPen(QColor(255, 255, 255, 240))
 
         painter.drawText(
             QRectF(
