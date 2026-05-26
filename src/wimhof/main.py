@@ -253,7 +253,8 @@ class BreathingWidget(QWidget):
     def finish_tick(self):
         dt = 0.016
 
-        self.finish_t += dt
+        if not self.completed:
+            self.finish_t += dt
 
         progress = min(
             self.finish_t / self.finish_duration,
@@ -281,12 +282,8 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         if progress >= 1.0:
-            self.finishing = False
-
             self.completed = True
-
             self.timer.stop()
-
             self.player.stop()
 
         self.update()
@@ -375,7 +372,7 @@ class BreathingWidget(QWidget):
     # --------------------------------------------------------
 
     def current_progress(self) -> float:
-        if self.completed:
+        if self.completed or self.finishing:
             return 1.0
 
         phase_start = self.phase_start_times[self.index]
@@ -452,8 +449,7 @@ class BreathingWidget(QWidget):
         # CENTER TEXT
         # ====================================================
 
-        # if not self.finishing and not self.completed:
-        if not self.completed:
+        if not self.finishing and not self.completed:
             if p.display == "cycles":
                 painter.setPen(QColor(120, 220, 255, 220))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 38, QFont.Weight.Bold))
@@ -501,12 +497,10 @@ class BreathingWidget(QWidget):
         painter.setFont(QFont(_HINTS_FONT_NAME, 16, QFont.Medium))
         painter.setPen(QColor(0x1C, 0x24, 0x65, 200))
 
-        mute_text = "M to mute" if not self.muted else "M to unmute"
-
         painter.drawText(
             self.rect().adjusted(space, space, -space, -space),
             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft,
-            f"Q or Esc to quit\nSpace to pause\n{mute_text}",
+            "M - (un)mute\nSpace - pause\nQ or Esc - quit",
         )
 
         # ====================================================
@@ -521,25 +515,32 @@ class BreathingWidget(QWidget):
 
         if self.paused:
             self.draw_shadow(painter,"Paused", "Press Space to continue", 220)
-        elif self.finishing:
+        elif self.finishing or self.completed:
             self.draw_completion_overlay(painter, 220)
-        elif self.completed:
-            self.draw_shadow(painter, "Completed", "Have a nice day!", 220)
 
         painter.end()
 
     # --------------------------------------------------------
 
-    def draw_completion_overlay(self, painter, alpha = 220):
+    def draw_completion_overlay(self, painter, alpha=220):
+        if self.completed:
+            progress = 1.0
+        else:
+            progress = min(
+                self.finish_t / self.finish_duration,
+                1.0,
+            )
 
-        progress = min(
-            self.finish_t / self.finish_duration,
-            1.0,
+            progress = ease(progress)
+
+        progress_alpha = int(alpha * progress)
+
+        self.draw_shadow(
+            painter,
+            "Completed",
+            "Have a nice day!",
+            progress_alpha,
         )
-
-        progress_alpha = min( int((alpha+10) * progress), alpha)
-
-        self.draw_shadow(painter, "Completed", "Have a nice day!", progress_alpha)
 
     # --------------------------------------------------------
 
@@ -727,9 +728,18 @@ class BreathingWidget(QWidget):
                 if self.completed:
                     self.completed = False
 
+                    self.finishing = False
+                    self.finish_t = 0.0
+
                     self.index = 0
 
                     self.t = 0.0
+
+                    self.base_radius = self.MIN_R
+                    self.pulse_radius = 0
+                    self.radius = self.MIN_R
+
+                    self.audio_output.setVolume(0.4)
 
                     self.timer.reset()
 

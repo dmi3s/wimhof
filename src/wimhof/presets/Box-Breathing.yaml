@@ -1,12 +1,9 @@
-# Breathing techniques of the Wim Hof Method
-# For more information, please visit:
-#     https://www.wimhofmethod.com/breathing-techniques
+# Often used by athletes and military personnel for concentration
 
 background_image: assets/background.jpg
 background_music: assets/music.mp3
 
 rounds:
-
   # ==========================================================
   # PREPARATION
   # ==========================================================
@@ -24,70 +21,70 @@ rounds:
   # BREATHING
   # ==========================================================
 
-  - section: Breathing
+  - section: breathing
 
     repeat: 2
 
     sequence:
       - type: inhale
         behavior: expand
-        duration: 2.2
+        duration: 4
         label: "INHALE"
+
+      - type: hold
+        behavior: pulse_small
+        duration: 4
+        label: "HOLD"
 
       - type: exhale
         behavior: shrink
-        duration: 2.2
+        duration: 4
         label: "EXHALE"
 
-  - section: Breathing
+      - type: hold
+        behavior: pulse_small
+        duration: 4
+        label: "HOLD"
 
-    repeat: 28
+  - section: breathing
+
+    repeat: 6
 
     sequence:
       - type: inhale
         behavior: expand
-        duration: 2.2
+        duration: 4
         label: "INHALE"
+        display: "cycles"
+
+      - type: hold
+        behavior: pulse_small
+        duration: 4
+        label: "HOLD"
         display: "cycles"
 
       - type: exhale
         behavior: shrink
-        duration: 2.2
+        duration: 4
         label: "EXHALE"
         display: "cycles"
 
-  # ==========================================================
-  # HOLD
-  # ==========================================================
-
-  - section: Hold
-    repeat: 1
-
-    sequence:
       - type: hold
         behavior: pulse_small
-        duration: 45
+        duration: 4
         label: "HOLD"
+        display: "cycles"
 
-      - type: deep_inhale
-        behavior: expand_big
-        duration: 3
-        label: "DEEP INHALE"
-
-      - type: final_hold
-        behavior: pulse_large
-        duration: 15
-        label: "HOLD"
 
   # ==========================================================
   # RECOVERY
   # ==========================================================
 
   - section: Recovery
-    repeat: 5
+    repeat: 1
 
     sequence:
       - type: relax
         behavior: fade_out
-        duration: 5
+        duration: 3
         label: "RELAX"

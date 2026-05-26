@@ -1,3 +1,5 @@
+# Soothes the nervous system and promotes sleep.
+
 background_image: assets/background.jpg
 background_music: assets/music.mp3
 
@@ -12,8 +14,7 @@ rounds:
     sequence:
       - type: prepare
         behavior: prepare
-#        duration: 3
-        duration: 1
+        duration: 3
         label: "PREPARE"
 
   # ==========================================================
@@ -22,27 +23,46 @@ rounds:
 
   - section: breathing
 
-    repeat: 1
-#    repeat: 8
+    repeat: 2
 
     sequence:
       - type: inhale
         behavior: expand
-#        duration: 4
-        duration: 1
+        duration: 4
         label: "INHALE"
 
       - type: hold
         behavior: pulse_small
-#        duration: 7
-        duration: 1
+        duration: 7
         label: "HOLD"
 
       - type: exhale
         behavior: shrink
-#        duration: 8
-        duration: 1
+        duration: 8
         label: "EXHALE"
+
+  - section: breathing
+
+    repeat: 6
+
+    sequence:
+      - type: inhale
+        behavior: expand
+        duration: 4
+        label: "INHALE"
+        display: "cycles"
+
+      - type: hold
+        behavior: pulse_small
+        duration: 7
+        label: "HOLD"
+        display: "cycles"
+
+      - type: exhale
+        behavior: shrink
+        duration: 8
+        label: "EXHALE"
+        display: "cycles"
 
   # ==========================================================
   # RECOVERY
@@ -54,5 +74,5 @@ rounds:
     sequence:
       - type: relax
         behavior: fade_out
-        duration: 1
+        duration: 5
         label: "RELAX"
