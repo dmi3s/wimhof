@@ -3,7 +3,7 @@ background_music: assets/music.mp3
 
 rounds:
   - name: "Round 1"
-    repetitions: 30
+    repetitions: 30 # number of inhale/exhale cycles
 
     prepare:
       duration: 3.0
@@ -18,7 +18,7 @@ rounds:
       label: "EXHALE"
 
     hold:
-      duration: 60.0
+      duration: 45.0
       label: "HOLD"
 
     deep_inhale:
@@ -34,7 +34,16 @@ rounds:
       label: "RELAX"
 
   - name: "Round 2"
-    inherit: true
+    inherit: true # inherit settings from Round 1
+    repetitions: 30
+
+    hold:
+      duration: 60.0
+      label: "HOLD"
 
   - name: "Round 3"
-    inherit: true
+    inherit: true # inherit settings from Round 1
+
+    hold:
+      duration: 60.0
+      label: "HOLD"

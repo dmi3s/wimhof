@@ -86,7 +86,7 @@ wimhof
 Clone repository:
 
 ```bash
-git clone https://github.com/yourname/wimhof.git
+git clone git@github.com:dmi3s/wimhof.git
 cd wimhof
 
 ```
