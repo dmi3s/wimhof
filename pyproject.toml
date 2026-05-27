@@ -61,8 +61,16 @@ email = "dmi3evsv@gmail.com"
 dev = [
     "black>=26.5.1",
     "mypy>=2.1.0",
+    "pip>=26.1.1",
     "ruff>=0.15.14",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+warn_unused_ignores = true
+warn_return_any = true
+warn_unused_configs = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/wimhof"]
@@ -78,6 +86,7 @@ exclude = [
   "/demo",
   "*.pyc",
   "__pycache__",
+  "/.zed",
 ]
 
 [project.urls]

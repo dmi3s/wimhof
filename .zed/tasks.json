@@ -1,0 +1,32 @@
+[
+  {
+    "label": "Run",
+    "command": "uv run wimhof",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Run 4-7-8",
+    "command": "uv run wimhof --config presets/4-7-8.yaml",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Box-Breathing.yaml",
+    "command": "uv run wimhof --config presets/box-breathing.yaml",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Ruff",
+    "command": "uv run ruff check src/",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Mypy",
+    "command": "uv run mypy src/",
+    "use_new_terminal": false
+  },
+  {
+    "label": "Build",
+    "command": "uv build",
+    "use_new_terminal": false
+  }
+]

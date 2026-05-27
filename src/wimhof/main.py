@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import argparse
-from copy import deepcopy
 import math
 import sys
+from copy import deepcopy
 from dataclasses import dataclass
 from importlib.resources import files
 
@@ -181,7 +181,7 @@ def load_config(path: str) -> tuple[dict, list[Phase]]:
 
 
 def ease(t: float) -> float:
-    return QEasingCurve(QEasingCurve.InOutSine).valueForProgress(t)
+    return QEasingCurve(QEasingCurve.Type.InOutSine).valueForProgress(t)
 
 
 # ============================================================
@@ -198,7 +198,7 @@ class BreathingWidget(QWidget):
 
         self.setWindowTitle("Breathing Trainer")
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
 
         self.paused = False
         self.completed = False
@@ -370,7 +370,7 @@ class BreathingWidget(QWidget):
         if p.behavior == "expand":
             target = self.MAX_R
             # self.base_radius = self.MIN_R + (self.MAX_R - self.MIN_R) * progress
-            
+
             self.base_radius = (
                 self.phase_start_radius + (target - self.phase_start_radius) * progress
             )
@@ -387,7 +387,7 @@ class BreathingWidget(QWidget):
             pass
 
         elif p.behavior == "hold_big":
-            self.base_radius = above_max
+            self.base_radius = self.phase_start_radius + (target - self.phase_start_radius) * progress
 
         elif p.behavior == "prepare":
             target = self.MIN_R
