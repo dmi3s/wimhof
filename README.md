@@ -1,98 +1,82 @@
-# Wim Hof Breathing Trainer
+[logo-pic]: src/wimhof/assets/app_icon.png
+[demo-pic]: demo/demo.jpg
+[demo-pic-preview]: demo/demo-preview.jpg
 
-_Atmospheric desktop breathing trainer. Inspired by the [Wim Hof breathing method](https://www.wimhofmethod.com/)._
+# ![Who took the file?][logo-pic] Wim Hof Breathing Trainer
 
-Built with PySide6 and YAML-driven session configuration, featuring smooth animations, ambient visuals, and structured breathing rounds.
+*Atmospheric desktop breathing trainer inspired by the 
+[Wim Hof breathing method](https://www.wimhofmethod.com/) 
+and other structured breathing techniques.*
 
-Very thanks to authors of this video: [Техника Вима Хофа | Почему она работает так хорошо?](https://www.youtube.com/watch?v=JvcbOnzZkyc).
+Built with Python, PySide6, and YAML-driven session configuration.
 
----
+The application focuses on smooth pacing, minimal UI distractions,
+and configurable breathing protocols.
 
-## ✨ Features
+## Features
+- Fullscreen breathing trainer
+- Smooth breathing ring animation
+- YAML-configurable breathing protocols
+- Multiple breathing techniques support
+- Timeline visualization
+- Countdown and cycle-based displays
+- Ambient background image and music
+- Pause / resume support
+- Fade-out completion sequence
+- Config inheritance system
+- Protocol presets support
 
-- Guided Wim Hof breathing sessions
-- Multi-round support (30–40+ cycles per round)
-- Deep inhale + breath hold + final countdown phase
-- Smooth easing breathing animation
-- Glowing breathing ring visualization
-- Round progress display (e.g. `Round 1/3`)
-- Cycle countdown per round
-- Immersive fullscreen interface
-- Background image support
-- Looping ambient music
-- Keyboard control (ESC or Q to exit)
 
----
+## Supported Breathing Styles
 
-## 🌊 Design Philosophy
 
-This project focuses on calm pacing, smooth transitions, and uninterrupted breathing flow.
+The application is protocol-driven and can describe different 
+breathing techniques entirely through YAML configuration.
 
-The goal is not feature complexity, but creating a comfortable and immersive breathing experience.
+Current examples include:
 
----
+- Wim Hof style breathing
+- 4-7-8 breathing
+- Box breathing
 
-## 🧠 Breathing Protocol
 
-The default session consists of three breathing rounds.
+## Design Goals
 
-Each round consists of:
+This project intentionally avoids:
 
-1. Breathing cycles (inhale / exhale repeated ~30 times)
-2. Breath hold (~60 seconds)
-3. Deep inhale after hold (~3 seconds)
-4. Breath hold (~15 seconds)
-5. Relax countdown (3–5 seconds, no visual ring)
+- excessive UI complexity
+- account systems
+- online services
+- unnecessary gamification
 
----
+The focus is:
 
-## 🖥️🎬 Demo
+- calm pacing
+- smooth visual transitions
+- readable structure
+- extensible protocol configuration
 
-![demo/demo-v.0.1.0-preview.png](demo/demo-v.0.1.0.jpg)
+ 
+## Demo
 
-##### [demo/demo-v.0.1.0.webm](demo/demo-v.0.1.0.webm) (1.0 Mb)
+![Who took this file?][demo-pic-preview]
 
-## 📁 Project Structure
+[Big picture: demo/demo.jpg][demo-pic]
+ 
 
-```text
-wimhof
-├── demo
-│   ├── demo-v.0.1.0-preview.jpg
-│   ├── demo-v.0.1.0.png
-│   └── demo-v.0.1.0.webm
-├── src
-│   └── wimhof
-│       ├── assets
-│       │   ├── __init__.py
-│       │   ├── app_icon.jpg
-│       │   ├── background.jpg
-│       │   ├── sources.md
-│       │   └── music.mp3
-│       ├── __init__.py
-│       ├── config.yaml
-│       └── main.py
-├── .gitignore
-├── .gitattributes
-├── pyproject.toml
-├── README.md
-└── uv.lock
+Video preview:
 
-```
+[demo/demo.webm](demo/demo.webm) 1.1 Mb
 
----
-
-## ⚙️ Installation
+## Installation
 
 Clone repository:
 
 ```bash
 git clone git@github.com:dmi3s/wimhof.git
 cd wimhof
-
 ```
-
-Using [uv](https://docs.astral.sh/uv/):
-
+Install dependencies using uv:
 ```bash
 uv sync
 ```
@@ -101,100 +85,180 @@ Run the application:
 
 ```bash
 uv run wimhof
+
+```
+## Using Custom Presets
+
+Run with a custom configuration file:
+
+```bash
+uv run wimhof --config presets/4-7-8.yaml
 ```
 
-## ⚙️ Configuration
+Short form:
 
-All breathing logic is defined in config.yaml.
+```bash
+uv run wimhof -c presets/Box-Breathing.yaml
+
+```
+
+## Configuration System
+
+Breathing protocols are described using YAML timelines.
+
+Each section may contain:
+
+- repeated sequences
+- arbitrary phase ordering
+- different display modes
+- animation behaviors
+- inherited configuration
 
 Example:
 
 ```yaml
-background_image: assets/background.jpg
-background_music: assets/music.mp3
-
 rounds:
-  - name: "Round 1"
-    repetitions: 30
+  # ==========================================================
+  # PREPARATION
+  # ==========================================================
 
-    inhale:
-      duration: 2.2
-      label: "INHALE"
+  - section: Preparation
+    repeat: 1
 
-    exhale:
-      duration: 2.2
-      label: "EXHALE"
+    sequence:
+      - type: prepare
+        behavior: prepare
+        duration: 3
+        label: "PREPARE"
 
-    hold:
-      duration: 60.0
-      label: "HOLD"
 
-    deep_inhale:
-      duration: 3.0
-      label: "DEEP INHALE"
-
-    final_hold:
-      duration: 15.0
-      label: "HOLD"
-
-    relax_countdown:
-      duration: 5.0
-      label: "RELAX"
-
-  - name: "Round 2"
-    repetitions: 30
-    inherit: true
-
-  - name: "Round 3"
-    repetitions: 30
-    inherit: true
 ```
 
-## 🎨 Controls
+The configuration system supports partial overrides 
+of inherited sequences.
 
-|   Key    |          Action          |
-| :------: | :----------------------: |
-| ESC or Q |     Exit application     |
-|    M     |      Mute / Unmute       |
-|  Space   | Pause / Resume / Restart |
+### Example Protocol
 
-## 🧘 Usage Notes
+Example 4-7-8 breathing sequence:
+```yaml
+- section: breathing
+  repeat: 8
 
-This application is designed for controlled breathing practice and relaxation.
+  sequence:
+    - type: inhale
+      behavior: expand
+      duration: 4
+      label: "INHALE"
 
-⚠️ Do not use while driving, swimming, or in unsafe environments.
+    - type: hold
+      behavior: pulse_small
+      duration: 7
+      label: "HOLD"
 
-## 🎵 Media Sources
+    - type: exhale
+      behavior: shrink
+      duration: 8
+      label: "EXHALE"
 
-Background image and music are used under free licenses:
+- section: breathing
+  repeat: 6
+  inherit: true
 
-Full attribution information is available in [src/wimhof/assets/sources.md](src/wimhof/assets/sources.md).
+  sequence:
+    - type: inhale
+      display: "cycles"
 
-## 🧩 Dependencies
+    - type: hold
+      display: "cycles"
 
-Defined in [pyproject.toml](pyproject.toml):
+    - type: exhale
+      display: "cycles"
 
+```
+
+## Controls
+
+| Key             | Action |
+|-----------------|--- |
+| **M**	          | Mute / Unmute |
+| **Space**       |	Pause / Resume / Restart |
+| **ESC** / **Q** | Quit application |
+
+## Project Structure
+
+```text
+wimhof/
+├── demo/
+│   ├── demo-preview.jpg
+│   ├── demo.jpg
+│   └── demo.webm
+├── src/
+│   └── wimhof/
+│       ├── assets/
+│       │   ├── app_icon.png
+│       │   ├── background.jpg
+│       │   ├── music.mp3
+│       │   └── sources.md
+│       └── presets/
+│           ├── 4-7-8.yaml
+│           └── Box-Breathing.yaml
+│       ├── __init__.PY
+│       ├── config.yaml
+│       └── main.py
+├── LICENSE
+├── pyproject.toml
+├── README.md
+└── uv.lock
+```
+
+## Dependencies
+
+Main dependencies:
 ```toml
+requires-python = ">=3.12"
 dependencies = [
   "pyside6>=6.11.1",
   "pyyaml>=6.0.3",
 ]
 ```
 
-## 🚀 Roadmap (🧊 Icebox)
+## Future Ideas
 
-- Audio cues for inhale/exhale transitions
-- Voice guidance (TTS coach mode)
-- Session presets (Focus / Sleep / Energy)
-- Statistics tracking
+Possible future additions:
+
+- Session history
+- Session statistics
+
+🧊 Icebox:
+- Local analytics database
+- Audio guidance
+- Breathing protocol sharing
 - Mobile version
-- Haptic feedback support
+- Wearable integration
 
-## 📄 License
+## Safety Notice
 
-[MIT](LICENSE)
+This application is intended for relaxation and controlled breathing exercises.
+
+Do not use while:
+
+- driving
+- swimming
+- operating machinery
+- performing activities requiring full attention
+
+## Media Sources
+
+Background image and music are used under free licenses.
+
+Full attribution information is available in 
+[src/wimhof/assets/sources.md](src/wimhof/assets/sources.md).
+
+## License
+
+MIT License.
+
+© 2026 dmi3s
 
 ---
-
-© May 2026 by dmi3s.<br/>
-Built with assistance from ChatGPT.
+_Developed using Python and PySide6 with assistance from ChatGPT._
