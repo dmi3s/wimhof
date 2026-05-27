@@ -1,8 +1,8 @@
-[logo-pic]: src/wimhof/assets/app_icon.png
-[demo-pic]: demo/demo.jpg
-[demo-pic-preview]: demo/demo-preview.jpg
+[logo]: src/wimhof/assets/app_icon.png
+[demo]: demo/demo.jpg
+[demo-thumbnail]: demo/demo.thumbnail.jpg
 
-# ![Who took the file?][logo-pic] Wim Hof Breathing Trainer
+# ![Who took the file?][logo] Wim Hof Breathing Trainer
 
 *Atmospheric desktop breathing trainer inspired by the 
 [Wim Hof breathing method](https://www.wimhofmethod.com/) 
@@ -59,14 +59,14 @@ The focus is:
  
 ## Demo
 
-![Who took this file?][demo-pic-preview]
+![Who took this file?][demo-thumbnail]
 
-[Big picture: demo/demo.jpg][demo-pic]
+[Big picture: demo/demo.jpg][demo]
  
 
 Video preview:
 
-[demo/demo.webm](demo/demo.webm) 1.1 Mb
+[demo/demo.webm](demo/demo.webm) 3.1 Mb
 
 ## Installation
 
