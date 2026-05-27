@@ -4,50 +4,83 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wimhof"
-version = "0.1.0"
+version = "0.1.1"
 description = "Atmospheric desktop breathing trainer inspired by the Wim Hof method."
 readme = "README.md"
+
 requires-python = ">=3.12"
+
 dependencies = [
     "pyside6>=6.11.1",
     "pyyaml>=6.0.3",
 ]
 
-[project.scripts]
+keywords = [
+    "python",
+    "qt",
+    "animation",
+    "breathing exercises",
+    "wim hof",
+]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Developers",
+
+  "License :: OSI Approved :: MIT License",
+
+  "Operating System :: OS Independent",
+
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+
+  "Topic :: Multimedia :: Sound/Audio",
+  "Topic :: Scientific/Engineering :: Human Machine Interfaces",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+
+  "Environment :: X11 Applications :: Qt",
+]
+
+
+[project.gui-scripts]
 wimhof = "wimhof.main:main"
 
 [[project.authors]]
 name = "Sergey (dmi3s) Dmitriev"
 email = "dmi3evsv@gmail.com"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/wimhof"]
+[[project.maintainers]]
+name = "Sergey (dmi3s) Dmitriev"
+email = "dmi3evsv@gmail.com"
 
 [dependency-groups]
 dev = [
     "black>=26.5.1",
     "mypy>=2.1.0",
     "ruff>=0.15.14",
-    "tool>=0.8.0",
 ]
 
-[tool.hatch.build]
+[tool.hatch.build.targets.wheel]
+packages = ["src/wimhof"]
+
+[tool.hatch.build.targets.sdist]
 include = [
-  "src/wimhof/*.py",
-  "src/wimhof/assets/*",
-  "src/wimhof/config.yaml",
-  "demo/demo-v.0.1.0-preview.jpg",
-  "README.md",
-  "LICENSE",
-  ".gitignore",
-  ".gitattributes",
+  "/src/wimhof",
+  "/README.md",
+  "/LICENSE",
+  "/pyproject.toml",
+]
+exclude = [
+  "/demo",
+  "*.pyc",
+  "__pycache__",
 ]
 
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.12",
-  "License :: OSI Approved",
-  "Operating System :: OS Independent",
-  "Topic :: Multimedia :: Sound/Audio",
-  "Topic :: Artistic Software",
-]
+[project.urls]
+Repository = "https://github.com/dmi3s/wimhof"
+Homepage = "https://github.com/dmi3s/wimhof"
+Issues = "https://github.com/dmi3s/wimhof/issues"

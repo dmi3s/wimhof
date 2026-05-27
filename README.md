@@ -202,7 +202,7 @@ wimhof/
 │       └── presets/
 │           ├── 4-7-8.yaml
 │           └── Box-Breathing.yaml
-│       ├── __init__.PY
+│       ├── __init__.py
 │       ├── config.yaml
 │       └── main.py
 ├── LICENSE
