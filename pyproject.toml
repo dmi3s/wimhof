@@ -61,8 +61,8 @@ email = "dmi3evsv@gmail.com"
 dev = [
     "black>=26.5.1",
     "mypy>=2.1.0",
-    "pip>=26.1.1",
     "ruff>=0.15.14",
+    "types-PyYAML>=6.0.12",
 ]
 
 [tool.mypy]

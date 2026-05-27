@@ -4,9 +4,9 @@
 
 # ![Who took the file?][logo] Wim Hof Breathing Trainer
 
-*Atmospheric desktop breathing trainer inspired by the 
-[Wim Hof breathing method](https://www.wimhofmethod.com/) 
-and other structured breathing techniques.*
+_Atmospheric desktop breathing trainer inspired by the
+[Wim Hof breathing method](https://www.wimhofmethod.com/)
+and other structured breathing techniques._
 
 Built with Python, PySide6, and YAML-driven session configuration.
 
@@ -14,6 +14,7 @@ The application focuses on smooth pacing, minimal UI distractions,
 and configurable breathing protocols.
 
 ## Features
+
 - Fullscreen breathing trainer
 - Smooth breathing ring animation
 - YAML-configurable breathing protocols
@@ -26,11 +27,9 @@ and configurable breathing protocols.
 - Config inheritance system
 - Protocol presets support
 
-
 ## Supported Breathing Styles
 
-
-The application is protocol-driven and can describe different 
+The application is protocol-driven and can describe different
 breathing techniques entirely through YAML configuration.
 
 Current examples include:
@@ -38,7 +37,6 @@ Current examples include:
 - Wim Hof style breathing
 - 4-7-8 breathing
 - Box breathing
-
 
 ## Design Goals
 
@@ -56,13 +54,11 @@ The focus is:
 - readable structure
 - extensible protocol configuration
 
- 
 ## Demo
 
 ![Who took this file?][demo-thumbnail]
 
 [Big picture: demo/demo.jpg][demo]
- 
 
 Video preview:
 
@@ -76,7 +72,9 @@ Clone repository:
 git clone git@github.com:dmi3s/wimhof.git
 cd wimhof
 ```
+
 Install dependencies using uv:
+
 ```bash
 uv sync
 ```
@@ -87,6 +85,7 @@ Run the application:
 uv run wimhof
 
 ```
+
 ## Using Custom Presets
 
 Run with a custom configuration file:
@@ -130,16 +129,15 @@ rounds:
         behavior: prepare
         duration: 3
         label: "PREPARE"
-
-
 ```
 
-The configuration system supports partial overrides 
+The configuration system supports partial overrides
 of inherited sequences.
 
 ### Example Protocol
 
 Example 4-7-8 breathing sequence:
+
 ```yaml
 - section: breathing
   repeat: 8
@@ -173,21 +171,22 @@ Example 4-7-8 breathing sequence:
 
     - type: exhale
       display: "cycles"
-
 ```
 
 ## Controls
 
-| Key             | Action |
-|-----------------|--- |
-| **M**	          | Mute / Unmute |
-| **Space**       |	Pause / Resume / Restart |
-| **ESC** / **Q** | Quit application |
+| Key             | Action                   |
+| --------------- | ------------------------ |
+| **M**           | Mute / Unmute            |
+| **Space**       | Pause / Resume / Restart |
+| **ESC** / **Q** | Quit application         |
 
 ## Project Structure
 
 ```text
 wimhof/
+├──.zed/
+│   └── tasks.json
 ├── demo/
 │   ├── demo-preview.jpg
 │   ├── demo.jpg
@@ -200,8 +199,8 @@ wimhof/
 │       │   ├── music.mp3
 │       │   └── sources.md
 │       └── presets/
-│           ├── 4-7-8.yaml
-│           └── Box-Breathing.yaml
+│           ├── 4_7_8.yaml
+│           └── box_breathing.yaml
 │       ├── __init__.py
 │       ├── config.yaml
 │       └── main.py
@@ -214,6 +213,7 @@ wimhof/
 ## Dependencies
 
 Main dependencies:
+
 ```toml
 requires-python = ">=3.12"
 dependencies = [
@@ -230,6 +230,7 @@ Possible future additions:
 - Session statistics
 
 🧊 Icebox:
+
 - Local analytics database
 - Audio guidance
 - Breathing protocol sharing
@@ -251,7 +252,7 @@ Do not use while:
 
 Background image and music are used under free licenses.
 
-Full attribution information is available in 
+Full attribution information is available in
 [src/wimhof/assets/sources.md](src/wimhof/assets/sources.md).
 
 ## License
@@ -261,4 +262,5 @@ MIT License.
 © 2026 dmi3s
 
 ---
+
 _Developed using Python and PySide6 with assistance from ChatGPT._

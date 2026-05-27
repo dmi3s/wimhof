@@ -64,6 +64,7 @@ class QTimerWithPause(QTimer):
 # DATA MODEL
 # ============================================================
 
+
 @dataclass(slots=True)
 class Phase:
     type: str
@@ -81,15 +82,16 @@ class Phase:
     cycle_remaining: int = 0
     cycle_total: int = 0
 
+
 # ============================================================
 # LOAD CONFIG HELPER
 # ============================================================
+
 
 def merge_round(base: dict, override: dict) -> dict:
     result = deepcopy(base)
 
     for key, value in override.items():
-
         if key == "inherit":
             continue
 
@@ -116,9 +118,11 @@ def merge_round(base: dict, override: dict) -> dict:
 
     return result
 
+
 # ============================================================
 # LOAD CONFIG
 # ============================================================
+
 
 def load_config(path: str) -> tuple[dict, list[Phase]]:
     with open(path, "r", encoding="utf-8") as f:
@@ -130,10 +134,9 @@ def load_config(path: str) -> tuple[dict, list[Phase]]:
 
     total_rounds = len(rounds)
 
-    base_round : dict | None= None
+    base_round: dict | None = None
 
     for ri, round_cfg in enumerate(rounds):
-
         if round_cfg.get("inherit", False):
             if base_round is None:
                 raise ValueError(...)
@@ -160,13 +163,10 @@ def load_config(path: str) -> tuple[dict, list[Phase]]:
                         behavior=item["behavior"],
                         duration=item["duration"],
                         label=item["label"],
-
                         section=section,
                         display=item.get("display", "countdown"),
-
                         round_index=ri + 1,
                         round_total=total_rounds,
-
                         cycle_index=cycle + 1,
                         cycle_remaining=remaining,
                         cycle_total=repeat,
@@ -174,6 +174,7 @@ def load_config(path: str) -> tuple[dict, list[Phase]]:
                 )
 
     return data, phases
+
 
 # ============================================================
 # EASING
@@ -308,7 +309,7 @@ class BreathingWidget(QWidget):
         progress = min(
             self.finish_t / self.finish_duration,
             1.0,
-            )
+        )
 
         progress = ease(progress)
 
@@ -377,21 +378,29 @@ class BreathingWidget(QWidget):
 
         elif p.behavior == "shrink":
             target = self.MIN_R
-            self.base_radius = self.phase_start_radius - (self.phase_start_radius - target) * progress
+            self.base_radius = (
+                self.phase_start_radius - (self.phase_start_radius - target) * progress
+            )
 
         elif p.behavior == "expand_big":
             target = above_max
-            self.base_radius = self.phase_start_radius + (target - self.phase_start_radius) * progress
+            self.base_radius = (
+                self.phase_start_radius + (target - self.phase_start_radius) * progress
+            )
 
         elif p.behavior == "hold":
             pass
 
         elif p.behavior == "hold_big":
-            self.base_radius = self.phase_start_radius + (target - self.phase_start_radius) * progress
+            self.base_radius = (
+                self.phase_start_radius + (target - self.phase_start_radius) * progress
+            )
 
         elif p.behavior == "prepare":
             target = self.MIN_R
-            self.base_radius = self.phase_start_radius - (self.phase_start_radius - target) * progress
+            self.base_radius = (
+                self.phase_start_radius - (self.phase_start_radius - target) * progress
+            )
 
         elif p.behavior == "fade_out":
             self.base_radius = (
@@ -563,7 +572,7 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         if self.paused:
-            self.draw_shadow(painter,"Paused", "Press Space to continue", 220)
+            self.draw_shadow(painter, "Paused", "Press Space to continue", 220)
         elif self.finishing or self.completed:
             self.draw_completion_overlay(painter, 220)
 
@@ -593,7 +602,13 @@ class BreathingWidget(QWidget):
 
     # --------------------------------------------------------
 
-    def draw_shadow(self, painter: QPainter, main_text: str, supplementary: str, shadow_alpha: int = 220):
+    def draw_shadow(
+        self,
+        painter: QPainter,
+        main_text: str,
+        supplementary: str,
+        shadow_alpha: int = 220,
+    ):
         painter.fillRect(self.rect(), QColor(0, 0, 0, shadow_alpha))
 
         painter.setPen(QColor(255, 255, 255, shadow_alpha))
@@ -616,9 +631,7 @@ class BreathingWidget(QWidget):
         r = self.radius
 
         for i in range(4):
-            pen = QPen(
-                QColor(80, 200, 255, 20 - i * 4)
-            )
+            pen = QPen(QColor(80, 200, 255, 20 - i * 4))
 
             pen.setWidth(18 - i * 3)
 
@@ -626,9 +639,7 @@ class BreathingWidget(QWidget):
 
             painter.setBrush(Qt.NoBrush)
 
-            painter.drawEllipse(
-                QRectF(cx - r, cy - r, r * 2, r * 2)
-            )
+            painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
 
         pen = QPen(QColor(120, 220, 255, 140))
 
@@ -638,9 +649,7 @@ class BreathingWidget(QWidget):
 
         painter.setPen(pen)
 
-        painter.drawEllipse(
-            QRectF(cx - r, cy - r, r * 2, r * 2)
-        )
+        painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
 
     # --------------------------------------------------------
     # TIMELINE
