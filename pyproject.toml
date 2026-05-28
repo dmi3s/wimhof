@@ -59,18 +59,24 @@ email = "dmi3evsv@gmail.com"
 
 [dependency-groups]
 dev = [
-    "black>=26.5.1",
+    "types-PyYAML>=6.0.12",
+    "debugpy>=1.8.20",
     "mypy>=2.1.0",
     "ruff>=0.15.14",
-    "types-PyYAML>=6.0.12",
 ]
 
 [tool.mypy]
 python_version = "3.12"
+install_types = false
 strict = false
 warn_unused_ignores = true
 warn_return_any = true
 warn_unused_configs = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+pretty = true
+
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/wimhof"]

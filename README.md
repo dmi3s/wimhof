@@ -1,6 +1,7 @@
 [logo]: src/wimhof/assets/app_icon.png
-[demo]: demo/demo.jpg
-[demo-thumbnail]: demo/demo.thumbnail.jpg
+[demo]: https://github.com/dmi3s/wimhof/blob/main/demo/demo.jpg
+[demo-thumbnail]: https://github.com/dmi3s/wimhof/blob/main/demo/demo.thumbnail.jpg
+[demo.webm]: https://github.com/dmi3s/wimhof/blob/main/demo/demo.webm
 
 # ![Who took the file?][logo] Wim Hof Breathing Trainer
 
@@ -62,7 +63,7 @@ The focus is:
 
 Video preview:
 
-[demo/demo.webm](demo/demo.webm) 3.1 Mb
+[demo/demo.webm][demo.webm] ~ 3 Mb
 
 ## Installation
 
@@ -90,14 +91,14 @@ uv run wimhof
 
 Run with a custom configuration file:
 
-```bash
-uv run wimhof --config presets/4-7-8.yaml
+```bash-u- run wimhof --config presets/4-7-8.yaml
+
 ```
 
 Short form:
 
 ```bash
-uv run wimhof -c presets/Box-Breathing.yaml
+uv run wimhof -c presets/box_breathing.yaml
 
 ```
 
@@ -175,20 +176,23 @@ Example 4-7-8 breathing sequence:
 
 ## Controls
 
-| Key             | Action                   |
-| --------------- | ------------------------ |
-| **M**           | Mute / Unmute            |
-| **Space**       | Pause / Resume / Restart |
+|       Key       | Action                   |
+| :-------------: | :----------------------- |
+|      **M**      | Mute / Unmute            |
+|    **Space**    | Pause / Resume / Restart |
 | **ESC** / **Q** | Quit application         |
 
 ## Project Structure
 
 ```text
 wimhof/
+├──.github/
+│   └── workflows/
+│       └── ci.yml                  -- GitHub CI workflow
 ├──.zed/
-│   └── tasks.json
+│   └── tasks.json                  -- Zed tasks (Run, Ruff, Mypy, Build)
 ├── demo/
-│   ├── demo-preview.jpg
+│   ├── demo_thumbnail.jpg
 │   ├── demo.jpg
 │   └── demo.webm
 ├── src/
@@ -197,13 +201,13 @@ wimhof/
 │       │   ├── app_icon.png
 │       │   ├── background.jpg
 │       │   ├── music.mp3
-│       │   └── sources.md
+│       │   └── sources.md          -- Sources for music, background, icon
 │       └── presets/
-│           ├── 4_7_8.yaml
-│           └── box_breathing.yaml
-│       ├── __init__.py
-│       ├── config.yaml
-│       └── main.py
+│           ├── 4-7-8.yaml          -- Preset for 4-7-8 breathing sequence
+│           └── box_breathing.yaml  -- Preset for box breathing sequence
+│       ├── __init__.py             -- Package initialization (dummy)
+│       ├── config.yaml             -- Wim Hof breathing configuration
+│       └── main.py                 -- Application code
 ├── LICENSE
 ├── pyproject.toml
 ├── README.md
@@ -226,8 +230,8 @@ dependencies = [
 
 Possible future additions:
 
-- Session history
-- Session statistics
+- logging
+- Sessions statistics
 
 🧊 Icebox:
 

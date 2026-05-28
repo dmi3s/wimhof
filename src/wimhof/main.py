@@ -226,10 +226,10 @@ class BreathingWidget(QWidget):
         # CIRCLE RADIUS ANIMATION
         # ====================================================
 
-        self.base_radius = self.MIN_R
-        self.pulse_radius = 0
-        self.radius = self.MIN_R
-        self.phase_start_radius = self.MAX_R
+        self.base_radius: float = self.MIN_R
+        self.pulse_radius: float = 0
+        self.radius: float = self.MIN_R
+        self.phase_start_radius: float = self.MAX_R
 
         # ====================================================
         # BACKGROUND
@@ -368,10 +368,10 @@ class BreathingWidget(QWidget):
         # behavior engine
         # ====================================================
 
+        target: float = 0.0
+
         if p.behavior == "expand":
             target = self.MAX_R
-            # self.base_radius = self.MIN_R + (self.MAX_R - self.MIN_R) * progress
-
             self.base_radius = (
                 self.phase_start_radius + (target - self.phase_start_radius) * progress
             )
@@ -399,7 +399,7 @@ class BreathingWidget(QWidget):
         elif p.behavior == "prepare":
             target = self.MIN_R
             self.base_radius = (
-                self.phase_start_radius - (self.phase_start_radius - target) * progress
+                self.phase_start_radius + (target - self.phase_start_radius) * progress
             )
 
         elif p.behavior == "fade_out":
@@ -443,7 +443,11 @@ class BreathingWidget(QWidget):
     def paintEvent(self, _):
         painter = QPainter(self)
 
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(
+            QPainter.RenderHint.Antialiasing
+            | QPainter.RenderHint.TextAntialiasing
+            | QPainter.RenderHint.SmoothPixmapTransform
+        )
 
         if not self.bg.isNull():
             painter.drawPixmap(self.rect(), self.bg)
@@ -487,7 +491,7 @@ class BreathingWidget(QWidget):
 
         painter.setPen(QColor(200, 200, 200, 230))
 
-        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 22, QFont.Bold))
+        painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 22, QFont.Weight.Bold))
 
         space = 56
 
@@ -552,13 +556,13 @@ class BreathingWidget(QWidget):
         # KEYBOARD HINTS
         # ====================================================
 
-        painter.setFont(QFont(_HINTS_FONT_NAME, 16, QFont.Medium))
-        painter.setPen(QColor(0x1C, 0x24, 0x65, 200))
+        painter.setFont(QFont(_HINTS_FONT_NAME, 16, QFont.Weight.Medium))
+        painter.setPen(QColor(0x1C + 0x10, 0x24 + 0x10, 0x65 + 0x10, 200))
 
         painter.drawText(
             self.rect().adjusted(space, space, -space, -space),
             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft,
-            "M - (un)mute\nSpace - pause\nQ or Esc - quit",
+            "  M   - mute/unmute\n Esc  - quit\nSpace - pause or restart",
         )
 
         # ====================================================
@@ -637,7 +641,7 @@ class BreathingWidget(QWidget):
 
             painter.setPen(pen)
 
-            painter.setBrush(Qt.NoBrush)
+            painter.setBrush(Qt.BrushStyle.NoBrush)
 
             painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
 
@@ -645,7 +649,7 @@ class BreathingWidget(QWidget):
 
         pen.setWidth(7)
 
-        pen.setCapStyle(Qt.RoundCap)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
         painter.setPen(pen)
 
@@ -673,12 +677,27 @@ class BreathingWidget(QWidget):
         fill_w = w * progress
 
         fill_rect = QRectF(x, y, fill_w, h)
+        # ====================================================
+        # small help tip
+        # ====================================================
+        if False and not self.finishing:
+            suplimentary_text = (
+                "🛈 Breathe in time with the blue circle, focusing on your breathing."
+            )
+            space = 40
+            painter.setPen(QColor(255, 255, 255, 128))
+            painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 14))
+            painter.drawText(
+                rect.adjusted(0, 0.8 * space, 0, 1.2 * space),
+                Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                suplimentary_text,
+            )
 
         # ====================================================
         # background
         # ====================================================
 
-        painter.setPen(Qt.NoPen)
+        painter.setPen(Qt.PenStyle.NoPen)
 
         painter.setBrush(QColor(255, 255, 255, 28))
 
@@ -702,7 +721,7 @@ class BreathingWidget(QWidget):
 
         painter.setPen(glow_pen)
 
-        painter.setBrush(Qt.NoBrush)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
 
         painter.drawRoundedRect(fill_rect, radius, radius)
 
@@ -747,7 +766,7 @@ class BreathingWidget(QWidget):
                 color = QColor(255, 255, 255, 70)
                 size = 10
 
-            painter.setPen(Qt.NoPen)
+            painter.setPen(Qt.PenStyle.NoPen)
 
             painter.setBrush(color)
 
@@ -845,20 +864,22 @@ def main():
 
     app = QApplication(sys.argv)
 
-    icon_path = files("wimhof") / "assets" / "app_icon.png"
+    fimhof_path = files("wimhof")
+
+    icon_path = fimhof_path.joinpath("assets", "app_icon.png")
 
     app.setWindowIcon(QIcon(str(icon_path)))
 
     if args.config:
-        config_path = files("wimhof") / args.config
+        config_path = fimhof_path.joinpath(args.config)
     else:
-        config_path = files("wimhof") / "config.yaml"
+        config_path = fimhof_path.joinpath("config.yaml")
 
     try:
         w = BreathingWidget(str(config_path))
 
     except Exception as e:
-        print(f"Failed to load config: {e}")
+        print(f"Failed to load config: {e}", file=sys.stderr)
 
         sys.exit(1)
 
