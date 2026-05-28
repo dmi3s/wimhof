@@ -379,7 +379,7 @@ class BreathingWidget(QWidget):
         elif p.behavior == "shrink":
             target = self.MIN_R
             self.base_radius = (
-                self.phase_start_radius - (self.phase_start_radius - target) * progress
+                self.phase_start_radius + (target - self.phase_start_radius) * progress
             )
 
         elif p.behavior == "expand_big":
@@ -403,8 +403,9 @@ class BreathingWidget(QWidget):
             )
 
         elif p.behavior == "fade_out":
+            target = self.MAX_R
             self.base_radius = (
-                self.base_radius - (self.base_radius - self.MAX_R) * progress / 4
+                self.base_radius + (target - self.base_radius) * progress / 4
             )
 
         # ====================================================
@@ -512,11 +513,13 @@ class BreathingWidget(QWidget):
 
         if not self.finishing and not self.completed:
             if p.display == "cycles":
-                painter.setPen(QColor(120, 220, 255, 220))
+                # painter.setPen(QColor(120, 220, 255, 220))
+                painter.setPen(QColor(0x5C, 0x14, 0x5C, 140))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 44, QFont.Weight.Bold))
 
             elif p.display == "countdown":
-                painter.setPen(QColor(255, 255, 255, 240))
+                # painter.setPen(QColor(255, 255, 255, 240))
+                painter.setPen(QColor(120, 220, 255, 140))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 44, QFont.Weight.Bold))
 
             else:
@@ -802,7 +805,7 @@ class BreathingWidget(QWidget):
                 return True
 
             elif key.key() == Qt.Key.Key_Space:
-                if self.completed:
+                if self.finishing or self.completed:
                     self.completed = False
 
                     self.finishing = False
