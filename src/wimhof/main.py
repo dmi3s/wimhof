@@ -125,7 +125,7 @@ def merge_round(base: dict, override: dict) -> dict:
 
 
 def load_config(path: str) -> tuple[dict, list[Phase]]:
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
     rounds = data["rounds"]
