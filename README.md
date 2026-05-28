@@ -1,9 +1,9 @@
 [logo]: src/wimhof/assets/app_icon.png
-[demo]: https://github.com/dmi3s/wimhof/blob/main/demo/demo.jpg
-[demo-thumbnail]: https://github.com/dmi3s/wimhof/blob/main/demo/demo.thumbnail.jpg
-[demo.webm]: https://github.com/dmi3s/wimhof/blob/main/demo/demo.webm
+[demo]: demo/demo.jpg
+[demo-thumbnail]: demo/demo.thumbnail.jpg
+[demo.webm]: demo/demo.webm
 
-# ![Who took the file?][logo] Wim Hof Breathing Trainer
+# ![logo][logo] Wim Hof Breathing Trainer
 
 _Atmospheric desktop breathing trainer inspired by the
 [Wim Hof breathing method](https://www.wimhofmethod.com/)
@@ -41,14 +41,14 @@ Current examples include:
 
 ## Design Goals
 
-This project intentionally avoids:
+#### This project intentionally avoids:
 
 - excessive UI complexity
 - account systems
 - online services
 - unnecessary gamification
 
-The focus is:
+#### The focus is:
 
 - calm pacing
 - smooth visual transitions
@@ -57,54 +57,57 @@ The focus is:
 
 ## Demo
 
-![Who took this file?][demo-thumbnail]
+![demo-thumbnail.jpg][demo-thumbnail]
 
-[Big picture: demo/demo.jpg][demo]
+Big picture: [demo/demo.jpg][demo]
 
 Video preview:
 
-[demo/demo.webm][demo.webm] ~ 3 Mb
+[demo/demo.webm][demo.webm] ~ 3.4 Mb
 
 ## Installation
 
-Clone repository:
+- For a quick local run:
+
+```bash
+git clone --depth 1 git@github.com:dmi3s/wimhof.git
+cd wimhof
+uv sync
+```
+
+- For development with full dependency groups (including dev extras):
 
 ```bash
 git clone git@github.com:dmi3s/wimhof.git
 cd wimhof
-```
-
-Install dependencies using uv:
-
-```bash
-uv sync
+uv sync --all-groups
 ```
 
 Run the application:
 
 ```bash
 uv run wimhof
-
 ```
 
 ## Using Custom Presets
 
 Run with a custom configuration file:
 
-```bash-u- run wimhof --config presets/4-7-8.yaml
-
+```bash
+uv run wimhof --config presets/4-7-8.yaml
 ```
 
 Short form:
 
 ```bash
 uv run wimhof -c presets/box_breathing.yaml
-
 ```
 
 ## Configuration System
 
 Breathing protocols are described using YAML timelines.
+The breathing engine is intentionally data-driven.
+Protocols are described as timelines rather than hardcoded logic.
 
 Each section may contain:
 
@@ -133,7 +136,10 @@ rounds:
 ```
 
 The configuration system supports partial overrides
-of inherited sequences.
+of inherited sequences:
+
+- sequence inheritance
+- partial sequence overrides
 
 ### Example Protocol
 
@@ -176,11 +182,11 @@ Example 4-7-8 breathing sequence:
 
 ## Controls
 
-|       Key       | Action                   |
-| :-------------: | :----------------------- |
-|      **M**      | Mute / Unmute            |
-|    **Space**    | Pause / Resume / Restart |
-| **ESC** / **Q** | Quit application         |
+|    Key    | Action                   |
+| :-------: | :----------------------- |
+|   **M**   | Mute / Unmute            |
+| **Space** | Pause / Resume / Restart |
+|  **ESC**  | Quit application         |
 
 ## Project Structure
 
@@ -190,9 +196,9 @@ wimhof/
 │   └── workflows/
 │       └── ci.yml                  -- GitHub CI workflow
 ├──.zed/
-│   └── tasks.json                  -- Zed tasks (Run, Ruff, Mypy, Build)
+│   └── tasks.json                  -- Zed tasks (Run, Ruff, Mypy, Audit, Build)
 ├── demo/
-│   ├── demo_thumbnail.jpg
+│   ├── demo.thumbnail.jpg
 │   ├── demo.jpg
 │   └── demo.webm
 ├── src/
@@ -205,7 +211,7 @@ wimhof/
 │       └── presets/
 │           ├── 4-7-8.yaml          -- Preset for 4-7-8 breathing sequence
 │           └── box_breathing.yaml  -- Preset for box breathing sequence
-│       ├── __init__.py             -- Package initialization (dummy)
+│       ├── __init__.py             -- Package marker
 │       ├── config.yaml             -- Wim Hof breathing configuration
 │       └── main.py                 -- Application code
 ├── LICENSE
@@ -228,12 +234,12 @@ dependencies = [
 
 ## Future Ideas
 
-Possible future additions:
+#### Possible future additions:
 
 - logging
 - Sessions statistics
 
-🧊 Icebox:
+#### Icebox:
 
 - Local analytics database
 - Audio guidance
