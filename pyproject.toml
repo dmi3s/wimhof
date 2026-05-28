@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wimhof"
-version = "0.1.1"
+version = "0.1.2"
 description = "Atmospheric desktop breathing trainer inspired by the Wim Hof method."
 readme = "README.md"
 
@@ -72,7 +72,6 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
-
 
 [tool.mypy]
 python_version = "3.12"
