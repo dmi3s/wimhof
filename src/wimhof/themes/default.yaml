@@ -1,0 +1,5 @@
+colors:
+  # Couner colors
+  cycles: [255, 255, 255, 240]
+  countdown: [120, 220, 255, 140]
+  prepare: [255, 255, 255, 240]

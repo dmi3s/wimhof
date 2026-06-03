@@ -177,6 +177,16 @@ def load_config(path: str) -> tuple[dict, list[Phase]]:
 
 
 # ============================================================
+# LOAD THEME
+# ============================================================
+
+
+def load_theme(path: str) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+# ============================================================
 # EASING
 # ============================================================
 
@@ -194,7 +204,7 @@ class BreathingWidget(QWidget):
     MIN_R = 80
     MAX_R = 260
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str, theme_path: str):
         super().__init__()
 
         self.setWindowTitle("Breathing Trainer")
@@ -208,6 +218,7 @@ class BreathingWidget(QWidget):
         self.showFullScreen()
 
         cfg, self.phases = load_config(config_path)
+        self.theme = load_theme(theme_path)
 
         self.index = 0
         self.t = 0.0
@@ -467,7 +478,7 @@ class BreathingWidget(QWidget):
         if p.behavior == "prepare":
             fade = ease(min(self.t / p.duration, 1.0))
 
-            overlay_alpha = int(140 * fade)
+            overlay_alpha = int(140 * ease(fade))
 
         elif p.behavior == "fade_out":
             fade = 1.0 - min(self.t / p.duration, 1.0)
@@ -512,18 +523,15 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         if not self.finishing and not self.completed:
+            painter.setPen(self.get_color(p.display))
+
             if p.display == "cycles":
-                # painter.setPen(QColor(120, 220, 255, 220))
-                painter.setPen(QColor(0x5C, 0x14, 0x5C, 140))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 44, QFont.Weight.Bold))
 
             elif p.display == "countdown":
-                # painter.setPen(QColor(255, 255, 255, 240))
-                painter.setPen(QColor(120, 220, 255, 140))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 44, QFont.Weight.Bold))
 
             else:
-                painter.setPen(QColor(255, 255, 255, 180))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 40))
 
             if p.display == "cycles":
@@ -542,7 +550,7 @@ class BreathingWidget(QWidget):
         # ====================================================
 
         painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 32, QFont.Weight.Bold))
-        painter.setPen(QColor(255, 255, 255, 240))
+        painter.setPen(self.get_color(p.display))
 
         painter.drawText(
             QRectF(
@@ -847,6 +855,22 @@ class BreathingWidget(QWidget):
 
         return super().eventFilter(obj, event)
 
+    # ============================================================
+    # THEME HELPERS
+    # ============================================================
+
+    def get_color(self, name: str) -> QColor:
+        r, g, b, a = self.theme["colors"].get(name, (255, 0, 0, 255))
+        return QColor(r, g, b, a)
+
+    # def get_font(self, name: str) -> QFont:
+    #     family = self.theme["fonts"][name]["family"]
+    #     size = self.theme["fonts"][name]["size"]
+    #     weight = self.theme["fonts"][name]["weight"]
+    #     style = self.theme["fonts"][name]["style"]
+
+    #     return QFont(family, size, weight, style)
+
 
 # ============================================================
 # MAIN
@@ -867,19 +891,20 @@ def main():
 
     app = QApplication(sys.argv)
 
-    fimhof_path = files("wimhof")
+    wimhof_path = files("wimhof")
 
-    icon_path = fimhof_path.joinpath("assets", "app_icon.png")
+    icon_path = wimhof_path.joinpath("assets", "app_icon.png")
 
     app.setWindowIcon(QIcon(str(icon_path)))
 
     if args.config:
-        config_path = fimhof_path.joinpath(args.config)
+        config_path = wimhof_path.joinpath(args.config)
     else:
-        config_path = fimhof_path.joinpath("config.yaml")
+        config_path = wimhof_path.joinpath("config.yaml")
 
+    theme_path = wimhof_path.joinpath("themes", "default.yaml")
     try:
-        w = BreathingWidget(str(config_path))
+        w = BreathingWidget(str(config_path), str(theme_path))
 
     except Exception as e:
         print(f"Failed to load config: {e}", file=sys.stderr)
