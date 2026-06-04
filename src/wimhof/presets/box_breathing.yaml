@@ -1,8 +1,5 @@
 # Often used by athletes and military personnel for concentration
 
-background_image: assets/background.jpg
-background_music: assets/music.mp3
-
 rounds:
   # ==========================================================
   # PREPARATION
@@ -51,7 +48,6 @@ rounds:
     inherit: true
 
     sequence:
-
       - type: inhale
         display: "cycles"
 
@@ -63,7 +59,6 @@ rounds:
 
       - type: hold
         display: "cycles"
-
 
   # ==========================================================
   # RECOVERY

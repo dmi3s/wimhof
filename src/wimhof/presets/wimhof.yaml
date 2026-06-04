@@ -1,4 +1,6 @@
-# Soothes the nervous system and promotes sleep.
+# Breathing techniques of the Wim Hof Method
+# For more information, please visit:
+#     https://www.wimhofmethod.com/breathing-techniques
 
 rounds:
   # ==========================================================
@@ -6,8 +8,8 @@ rounds:
   # ==========================================================
 
   - section: Preparation
-    repeat: 1
 
+    repeat: 1
     sequence:
       - type: prepare
         behavior: prepare
@@ -18,38 +20,54 @@ rounds:
   # BREATHING
   # ==========================================================
 
-  - section: breathing
+  - section: Breathing
+
     repeat: 2
 
     sequence:
       - type: inhale
         behavior: expand
-        duration: 4
+        duration: 2
         label: "INHALE"
-
-      - type: hold
-        behavior: pulse_small
-        duration: 7
-        label: "HOLD"
 
       - type: exhale
         behavior: shrink
-        duration: 8
+        duration: 2
         label: "EXHALE"
 
-  - section: breathing
-    repeat: 6
+  - section: Breathing
     inherit: true
+    repeat: 28
 
     sequence:
       - type: inhale
         display: "cycles"
 
-      - type: hold
-        display: "cycles"
-
       - type: exhale
         display: "cycles"
+
+  # ==========================================================
+  # HOLD
+  # ==========================================================
+
+  - section: Hold
+    repeat: 1
+
+    sequence:
+      - type: hold
+        behavior: pulse_small
+        duration: 45
+        label: "HOLD"
+
+      - type: deep_inhale
+        behavior: expand_big
+        duration: 3
+        label: "DEEP INHALE"
+
+      - type: final_hold
+        behavior: pulse_large
+        duration: 15
+        label: "HOLD"
 
   # ==========================================================
   # RECOVERY
