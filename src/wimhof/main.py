@@ -580,13 +580,6 @@ class BreathingWidget(QWidget):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default="config.yaml",
-        help="Main configuration file (contains theme and breathing paths)",
-    )
-    parser.add_argument(
         "-t",
         "--theme",
         type=str,
@@ -606,9 +599,11 @@ def main():
     app.setWindowIcon(QIcon(str(icon_path)))
 
     # Read main config file
-    config_path = wimhof_path.joinpath(args.config)
+    main_cfg = "config.yaml"
+
+    config_path = wimhof_path.joinpath(main_cfg)
     try:
-        with open(config_path, encoding="utf-8") as f:
+        with open(str(config_path), encoding="utf-8") as f:
             main_cfg = yaml.safe_load(f)
     except Exception as e:
         print(f"Failed to load main config {config_path}: {e}", file=sys.stderr)
