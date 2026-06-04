@@ -142,7 +142,7 @@ def load_scheme(path: str) -> tuple[dict, list[Phase]]:
 # ----------------------------------------------------------------------
 # Load a theme (colors, background image, background music)
 # ----------------------------------------------------------------------
-def load_theme(path: str) -> Any:  # type: dict(Any, Any), fuck the ruff)
+def load_theme(path: str):
     with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
