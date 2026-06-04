@@ -94,13 +94,13 @@ uv run wimhof
 Run with a custom configuration file:
 
 ```bash
-uv run wimhof --config presets/4-7-8.yaml
+uv run wimhof --breathing presets/4-7-8.yaml
 ```
 
 Short form:
 
 ```bash
-uv run wimhof -c presets/box_breathing.yaml
+uv run wimhof -b presets/box_breathing.yaml
 ```
 
 ## Configuration System
@@ -210,13 +210,21 @@ wimhof/
 │       │   └── sources.md          -- Sources for music, background, icon
 │       └── presets/
 │           ├── 4-7-8.yaml          -- Preset for 4-7-8 breathing sequence
-│           └── box_breathing.yaml  -- Preset for box breathing sequence
-│       ├── __init__.py             -- Package marker
+│           ├── box_breathing.yaml  -- Preset for box breathing sequence
+│           └── wimhof.yaml        -- Preset for Wim Hof breathing sequence
+│       └── themes/
+│           └── default.yaml        -- Default theme. Just one for now.
+│       ├── __init__.py             -- Package marker (empty)
+│       ├── __main__.py             -- Entry point. Runs the application.
 │       ├── config.yaml             -- Wim Hof breathing configuration
-│       └── main.py                 -- Application code
+│       └── main.py                 -- Application code. Sorry about the long file,
+│                                   --     the main reason - easenest way of communication
+│                                   --     with different LLM's.
 ├── LICENSE
 ├── pyproject.toml
 ├── README.md
+├── config.yaml                     -- Configuration file for the default
+│                                   --   Wim Hof breathing application
 └── uv.lock
 ```
 
