@@ -273,4 +273,4 @@ MIT License.
 
 ---
 
-_Developed using Python and PySide6 with assistance from ChatGPT._
+_Developed using Python and PySide6 (Qt) with assistance from ChatGPT and DeepSeek._
