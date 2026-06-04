@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wimhof"
-version = "0.1.2"
+version = "0.1.3"
 description = "Atmospheric desktop breathing trainer inspired by the Wim Hof method."
 readme = "README.md"
 
