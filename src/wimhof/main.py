@@ -165,8 +165,8 @@ class BreathingWidget(QWidget):
         super().__init__()
         self.setWindowTitle("Breathing Trainer")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        self.paused = False
         self.completed = False
+        self.paused = False
         self.muted = False
         self.showFullScreen()
 
