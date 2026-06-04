@@ -1,0 +1,77 @@
+# DEBUG PRESET — NOT FOR BREATHING PRACTICE!
+# This file demonstrates all behavior types and display modes.
+# It is intended for developers and testers only.
+# Do NOT use it for actual breathing exercises.
+
+rounds:
+  - section: "Test: Expand"
+    repeat: 1
+    sequence:
+      - type: "inhale"
+        behavior: "expand"
+        duration: 2.0
+        label: "Expand test"
+        display: "countdown"
+
+  - section: "Test: Shrink"
+    repeat: 1
+    sequence:
+      - type: "exhale"
+        behavior: "shrink"
+        duration: 2.0
+        label: "Shrink test"
+        display: "countdown"
+
+  - section: "Test: Pulse (after shrink)"
+    repeat: 1
+    sequence:
+      - type: "pulse"
+        behavior: "pulse"
+        duration: 3.0
+        label: "Pulse (small oscillation)"
+        display: "countdown"
+
+  - section: "Test: Expand big"
+    repeat: 1
+    sequence:
+      - type: "inhale"
+        behavior: "expand_big"
+        duration: 2.0
+        label: "Expand big"
+        display: "countdown"
+
+  - section: "Test: Hold big"
+    repeat: 1
+    sequence:
+      - type: "hold"
+        behavior: "hold_big"
+        duration: 2.0
+        label: "Hold big (large radius)"
+        display: "countdown"
+
+  - section: "Test: Prepare (fade in)"
+    repeat: 1
+    sequence:
+      - type: "prepare"
+        behavior: "prepare"
+        duration: 2.0
+        label: "Prepare"
+        display: "countdown"
+
+  - section: "Test: Fade out"
+    repeat: 1
+    sequence:
+      - type: "fade"
+        behavior: "fade_out"
+        duration: 2.0
+        label: "Fade out"
+        display: "countdown"
+
+  - section: "Test: Cycles display"
+    repeat: 3
+    sequence:
+      - type: "cycle"
+        behavior: "hold"
+        duration: 1.0
+        label: "Cycle counter"
+        display: "cycles"

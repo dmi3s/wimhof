@@ -1,4 +1,15 @@
+// Tasks for the Wimhof breathing exercise app.
+// Default shortcut: Alt+Shift+T in Zed editor.
+// If you're here, you will be using debug mode.
+// See presets/debug.yaml accordingly.
+// Good luck!
+
 [
+  {
+    "label": "Debug with debug config",
+    "command": "uv run wimhof -b presets/debug.yaml",
+    "use_new_terminal": false,
+  },
   {
     "label": "Run",
     "command": "uv run wimhof",
@@ -6,12 +17,12 @@
   },
   {
     "label": "Run 4-7-8",
-    "command": "uv run wimhof --config presets/4-7-8.yaml",
+    "command": "uv run wimhof -b presets/4-7-8.yaml",
     "use_new_terminal": false,
   },
   {
     "label": "Run Box Breathing",
-    "command": "uv run wimhof --config presets/box_breathing.yaml",
+    "command": "uv run wimhof -b presets/box_breathing.yaml",
     "use_new_terminal": false,
   },
   {
