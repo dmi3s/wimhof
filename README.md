@@ -9,10 +9,18 @@ _Atmospheric desktop breathing trainer inspired by the
 [Wim Hof breathing method](https://www.wimhofmethod.com/)
 and other structured breathing techniques._
 
-Built with Python, PySide6, and YAML-driven session configuration.
+**Wimhof** – Visual Breathing Trainer
 
-The application focuses on smooth pacing, minimal UI distractions,
-and configurable breathing protocols.
+A desktop tool that guides you through the Wim Hof breathing method using a pulsing circle on screen.
+
+- The circle grows, shrinks, and pauses to signal inhale, exhale, and breath holds.
+- No counting – just follow the rhythm.
+- Fully customizable: colors, background music, and phase durations are stored in YAML configs.
+- Minimalistic interface, controlled by keyboard (Space, M, Esc).
+
+Why it works:
+
+The method combines controlled hyperventilation and breath retention, triggering the Bohr effect – improved oxygen delivery, vasodilation, and autonomic balance. Regular practice may reduce cortisol and enhance stress resilience. This tool simply helps you keep the rhythm, while the physiology stays natural.
 
 ## Features
 

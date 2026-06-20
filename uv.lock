@@ -340,7 +340,7 @@ wheels = [
 
 [[package]]
 name = "wimhof"
-version = "0.1.3.2"
+version = "0.1.3.3"
 source = { editable = "." }
 dependencies = [
     { name = "pyside6" },
