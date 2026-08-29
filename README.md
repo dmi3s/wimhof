@@ -35,6 +35,8 @@ The method combines controlled hyperventilation and breath retention, triggering
 - Fade-out completion sequence
 - Config inheritance system
 - Protocol presets support
+- Headless simulation mode (`--simulate`)
+- Unit-tested core logic (model + session)
 
 ## Supported Breathing Styles
 
@@ -62,6 +64,7 @@ Current examples include:
 - smooth visual transitions
 - readable structure
 - extensible protocol configuration
+- layered architecture: data model → session state machine → Qt view
 
 ## Demo
 
@@ -110,6 +113,21 @@ Short form:
 ```bash
 uv run wimhof -b presets/box_breathing.yaml
 ```
+
+You can also run a **headless simulation** (no GUI/audio) that prints the
+phase transitions of a protocol over time — handy for inspecting a preset:
+
+```bash
+uv run wimhof --simulate -b presets/4-7-8.yaml
+```
+
+All CLI options:
+
+| Flag                  | Description                          |
+| --------------------- | ------------------------------------ |
+| `-b, --breathing FILE` | Breathing protocol YAML              |
+| `-t, --theme FILE`     | Theme YAML                           |
+| `-s, --simulate`       | Headless simulation (no GUI/audio)   |
 
 ## Configuration System
 
@@ -202,7 +220,7 @@ Example 4-7-8 breathing sequence:
 wimhof/
 ├──.github/
 │   └── workflows/
-│       └── ci.yml                  -- GitHub CI workflow
+│       └── ci.yml                  -- GitHub CI workflow (ruff, mypy, pytest)
 ├──.zed/
 │   └── tasks.json                  -- Zed tasks (Run, Ruff, Mypy, Audit, Build)
 ├── demo/
@@ -216,18 +234,21 @@ wimhof/
 │       │   ├── background.jpg
 │       │   ├── music.mp3
 │       │   └── sources.md          -- Sources for music, background, icon
-│       └── presets/
-│           ├── 4-7-8.yaml          -- Preset for 4-7-8 breathing sequence
-│           ├── box_breathing.yaml  -- Preset for box breathing sequence
-│           └── wimhof.yaml        -- Preset for Wim Hof breathing sequence
-│       └── themes/
-│           └── default.yaml        -- Default theme. Just one for now.
+│       ├── presets/
+│       │   ├── 4-7-8.yaml          -- Preset for 4-7-8 breathing sequence
+│       │   ├── box_breathing.yaml  -- Preset for box breathing sequence
+│       │   └── wimhof.yaml         -- Preset for Wim Hof breathing sequence
+│       ├── themes/
+│       │   └── default.yaml        -- Default theme. Just one for now.
 │       ├── __init__.py             -- Package marker (empty)
 │       ├── __main__.py             -- Entry point. Runs the application.
-│       ├── config.yaml             -- Wim Hof breathing configuration
-│       └── main.py                 -- Application code. Sorry about the long file,
-│                                   --     the main reason - easenest way of communication
-│                                   --     with different LLM's.
+│       ├── model.py                -- Data model: Phase, YAML loading, progress
+│       ├── session.py              -- Qt-free session state machine
+│       ├── main.py                 -- Qt view: rendering, input, audio, CLI
+│       └── config.yaml             -- Wim Hof breathing configuration
+├── tests/
+│   ├── test_model.py               -- Tests for model (load_scheme/merge_round/progress)
+│   └── test_session.py            -- Tests for session state machine
 ├── LICENSE
 ├── pyproject.toml
 ├── README.md
@@ -247,6 +268,25 @@ dependencies = [
   "pyyaml>=6.0.3",
 ]
 ```
+
+## Development
+
+The core logic (data model and session state machine) is Qt-free and unit-tested.
+
+Run the test suite:
+
+```bash
+uv run pytest
+```
+
+Headless simulation — print phase transitions over time without launching the GUI:
+
+```bash
+uv run wimhof --simulate -b presets/4-7-8.yaml
+```
+
+CI (`.github/workflows/ci.yml`) runs `ruff format/check`, `mypy`, and `pytest`
+on every push and pull request.
 
 ## Future Ideas
 
@@ -290,3 +330,4 @@ MIT License.
 ---
 
 _Developed using Python and PySide6 (Qt) with assistance from ChatGPT and DeepSeek._
+<!-- doc-sha256: f3172816da4b559fc8ed9ac96d68b18762e4cc0cbf3e853b863322a235b6eafa -->

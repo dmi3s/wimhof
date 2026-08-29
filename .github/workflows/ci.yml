@@ -35,6 +35,9 @@ jobs:
       - name: Unit tests
         run: uv run pytest -q
 
+      - name: Documentation version check
+        run: uv run python scripts/check_doc_version.py --strict
+
       - name: Audit
         run: uv audit --preview-features audit
 
