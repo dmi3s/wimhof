@@ -29,6 +29,12 @@ jobs:
       - name: Mypy type checking
         run: uv run mypy src/wimhof
 
+      - name: Ruff lint (tests)
+        run: uv run ruff check tests
+
+      - name: Unit tests
+        run: uv run pytest -q
+
       - name: Audit
         run: uv audit --preview-features audit
 
