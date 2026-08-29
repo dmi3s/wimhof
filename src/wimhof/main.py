@@ -8,7 +8,6 @@ from importlib.resources import files
 
 import yaml
 from PySide6.QtCore import (
-    QEasingCurve,
     QEvent,
     QRectF,
     Qt,
@@ -27,7 +26,7 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QApplication, QWidget
 
-from .animation import interpolate, target_radius
+from .animation import ease, precompute_phase_radii, radius_at
 from .model import Phase, load_theme
 from .session import BreathingSession
 
@@ -60,13 +59,6 @@ class QTimerWithPause(QTimer):
 
 
 # ----------------------------------------------------------------------
-# Easing curve for smooth animations
-# ----------------------------------------------------------------------
-def ease(t: float) -> float:
-    return QEasingCurve(QEasingCurve.Type.InOutSine).valueForProgress(t)
-
-
-# ----------------------------------------------------------------------
 # Main breathing widget
 # ----------------------------------------------------------------------
 class BreathingWidget(QWidget):
@@ -86,10 +78,11 @@ class BreathingWidget(QWidget):
         # Load theme (colors + background image + background music)
         self.theme = load_theme(theme_path)
 
-        # Animation state
-        self.base_radius: float = self.MIN_R
+        # Animation state: radius is a pure projection of the phase list.
         self.radius: float = self.MIN_R
-        self.phase_start_radius: float = self.MIN_R
+        self.phase_radii = precompute_phase_radii(
+            self.session.phases, self.MIN_R, self.MAX_R
+        )
 
         # Background image (from theme)
         bg_rel = self.theme.get("background_image", "assets/background.jpg")
@@ -198,30 +191,11 @@ class BreathingWidget(QWidget):
         dt = min(now - self._last_tick, 0.1)
         self._last_tick = now
 
-        prev_index = self.session.index
-        prev_finishing = self.session.finishing
         self.session.advance(dt)
 
-        # A phase boundary (or entry into finishing) just happened:
-        # start the next radius interpolation from the current radius.
-        if self.session.index != prev_index or (
-            self.session.finishing and not prev_finishing
-        ):
-            self.phase_start_radius = self.base_radius
-
         p = self.phase
-        progress = min(self.session.t / p.duration, 1.0)
-        progress = ease(progress)
-
-        # ----- Update base_radius according to behavior (pure math) -----
-        target = target_radius(p.behavior, self.MIN_R, self.MAX_R)
-        if target is not None:
-            self.base_radius = interpolate(
-                self.phase_start_radius, target, progress, alpha=1.0
-            )
-        # hold (target is None): radius unchanged
-
-        self.radius = self.base_radius
+        start, end = self.phase_radii[self.session.index]
+        self.radius = radius_at(start, end, self.session.t, p.duration)
 
         self.update()
 
@@ -429,7 +403,6 @@ class BreathingWidget(QWidget):
                 if self.finishing or self.completed:
                     # Restart session
                     self.session.restart()
-                    self.base_radius = self.MIN_R
                     self.radius = self.MIN_R
                     self.audio_output.setVolume(0.4)
                     self.timer.reset()

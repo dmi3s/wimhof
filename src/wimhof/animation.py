@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import math
+
+
+def ease(t: float) -> float:
+    """InOutSine easing, identical to ``QEasingCurve.InOutSine``."""
+    return 0.5 - 0.5 * math.cos(math.pi * t)
+
 
 def target_radius(behavior: str, min_r: float, max_r: float) -> float | None:
-    """Pure mapping from a phase behavior to its target ring radius.
+    """Target ring radius at the END of a phase, or ``None`` to retain.
 
     Moving behaviors target a radius; retention behaviors
     (``hold``, ``pass``, ``prepare``, ``relax``) return ``None`` so the
@@ -25,3 +32,37 @@ def interpolate(start: float, target: float, t: float, alpha: float = 1.0) -> fl
     """
     t = t**alpha
     return start + (target - start) * t
+
+
+def precompute_phase_radii(
+    phases, min_r: float, max_r: float
+) -> list[tuple[float, float]]:
+    """Deterministic ``(start, end)`` radius for each phase, folded over the list.
+
+    The radius of a phase is purely determined by the declared behaviors:
+    moving phases target MAX/MIN, retention phases keep the entry radius.
+    ``end`` of phase ``i`` equals ``start`` of phase ``i+1``, so the circle
+    is continuous and has no state of its own.
+    """
+    radii: list[tuple[float, float]] = []
+    prev_end = min_r
+    for p in phases:
+        start = prev_end
+        target = target_radius(p.behavior, min_r, max_r)
+        end = target if target is not None else start
+        radii.append((start, end))
+        prev_end = end
+    return radii
+
+
+def radius_at(
+    start: float, end: float, t: float, duration: float, alpha: float = 1.0
+) -> float:
+    """Pure ring radius at time ``t`` within a phase of ``duration`` seconds.
+
+    This is a direct projection of the phase state: the view holds no
+    mutable radius memory of its own.
+    """
+    progress = min(t / duration, 1.0) if duration > 0 else 1.0
+    progress = ease(progress)
+    return interpolate(start, end, progress, alpha)

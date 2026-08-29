@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from wimhof import animation
+from wimhof.model import Phase
 
 MIN_R = 80.0
 MAX_R = 260.0
@@ -28,3 +29,46 @@ def test_interpolate_alpha_shapes_curve():
     assert animation.interpolate(0.0, 10.0, 0.5, 0.5) > 5.0
     # alpha > 1 -> slow start (value below linear at t=0.5)
     assert animation.interpolate(0.0, 10.0, 0.5, 2.0) < 5.0
+
+
+def _mk(behavior, duration):
+    return Phase(
+        type="t",
+        behavior=behavior,
+        duration=duration,
+        label="label",
+        section="sec",
+        display="countdown",
+        round_index=0,
+        round_total=1,
+    )
+
+
+def test_precompute_phase_radii_is_pure_chain():
+    phases = [
+        _mk("prepare", 1),
+        _mk("inhale", 2),
+        _mk("hold", 3),
+        _mk("outhale", 2),
+        _mk("release", 2),
+    ]
+    radii = animation.precompute_phase_radii(phases, MIN_R, MAX_R)
+    assert radii[0] == (MIN_R, MIN_R)  # prepare: retain small
+    assert radii[1] == (MIN_R, MAX_R)  # inhale: grow to max
+    assert radii[2] == (MAX_R, MAX_R)  # hold: keep max
+    assert radii[3] == (MAX_R, MIN_R)  # outhale: shrink to min
+    assert radii[4] == (MIN_R, MIN_R)  # release: already min
+    # continuity: end of phase i == start of phase i+1
+    for (_, e), (s, _) in zip(radii, radii[1:], strict=False):
+        assert e == s
+
+
+def test_radius_at_follows_state():
+    # hold at a definite radius: constant for any t
+    for t in (0.0, 0.7, 2.0):
+        assert animation.radius_at(200.0, 200.0, t, 2.0) == 200.0
+    # inhale-like motion hits endpoints and stays within bounds
+    assert animation.radius_at(80.0, 260.0, 0.0, 2.0) == 80.0
+    assert animation.radius_at(80.0, 260.0, 2.0, 2.0) == 260.0
+    mid = animation.radius_at(80.0, 260.0, 1.0, 2.0)
+    assert 80.0 < mid < 260.0
