@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv/
 
+# Editor cruft (PyCharm/IDEA) – leftover, not worth tracking
+.idea/
+
 .ruff_cache/
 .mypy_cache/
