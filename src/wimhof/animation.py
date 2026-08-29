@@ -55,14 +55,35 @@ def precompute_phase_radii(
     return radii
 
 
+def pulse_offset(t: float, amplitude: float = 10.0, period: float = 6.0) -> float:
+    """Gentle radius oscillation (sine) used during breath retention.
+
+    A calm, slow swell distinct from the ordinary inhale/exhale rhythm:
+    the ring "breathes" quietly around its held radius instead of freezing.
+    """
+    return amplitude * math.sin(2.0 * math.pi * t / period)
+
+
 def radius_at(
-    start: float, end: float, t: float, duration: float, alpha: float = 1.0
+    start: float,
+    end: float,
+    t: float,
+    duration: float,
+    behavior: str | None = None,
+    alpha: float = 1.0,
+    pulse_amp: float = 10.0,
+    pulse_period: float = 6.0,
 ) -> float:
     """Pure ring radius at time ``t`` within a phase of ``duration`` seconds.
 
     This is a direct projection of the phase state: the view holds no
-    mutable radius memory of its own.
+    mutable radius memory of its own. Breath retention (``hold``) adds a
+    gentle, slow pulse around the held radius so a long retention keeps a
+    calm rhythm instead of freezing.
     """
     progress = min(t / duration, 1.0) if duration > 0 else 1.0
     progress = ease(progress)
-    return interpolate(start, end, progress, alpha)
+    r = interpolate(start, end, progress, alpha)
+    if behavior == "hold":
+        r += pulse_offset(t, pulse_amp, pulse_period)
+    return r

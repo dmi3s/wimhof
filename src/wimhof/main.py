@@ -195,7 +195,7 @@ class BreathingWidget(QWidget):
 
         p = self.phase
         start, end = self.phase_radii[self.session.index]
-        self.radius = radius_at(start, end, self.session.t, p.duration)
+        self.radius = radius_at(start, end, self.session.t, p.duration, p.behavior)
 
         self.update()
 

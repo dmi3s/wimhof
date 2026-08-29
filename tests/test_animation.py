@@ -72,3 +72,17 @@ def test_radius_at_follows_state():
     assert animation.radius_at(80.0, 260.0, 2.0, 2.0) == 260.0
     mid = animation.radius_at(80.0, 260.0, 1.0, 2.0)
     assert 80.0 < mid < 260.0
+
+
+def test_radius_at_pulses_on_hold():
+    center = 200.0
+    vals = [
+        animation.radius_at(center, center, t, 45.0, "hold")
+        for t in (0.0, 1.5, 3.0, 45.0)
+    ]
+    # stays within the gentle pulse band around the held radius
+    assert all(abs(v - center) <= 10.0 + 1e-6 for v in vals)
+    # but it actually moves (calm rhythm, not a dead static circle)
+    assert max(vals) - min(vals) > 1.0
+    # a plain pause keeps the radius exactly constant
+    assert animation.radius_at(center, center, 12.3, 45.0, "pass") == center
