@@ -30,7 +30,7 @@ rounds:
         duration: 2
         label: "INHALE"
 
-      - type: exhale
+      - type: outhale
         behavior: outhale
         duration: 2
         label: "EXHALE"
@@ -43,7 +43,7 @@ rounds:
       - type: inhale
         display: "cycles"
 
-      - type: exhale
+      - type: outhale
         display: "cycles"
 
   # ==========================================================
@@ -59,12 +59,12 @@ rounds:
         duration: 45
         label: "HOLD"
 
-      - type: deep_inhale
+      - type: inhale
         behavior: inhale
         duration: 3
         label: "DEEP INHALE"
 
-      - type: final_hold
+      - type: hold
         behavior: hold
         duration: 15
         label: "HOLD"

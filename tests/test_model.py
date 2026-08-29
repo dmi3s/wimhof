@@ -48,7 +48,7 @@ rounds:
     repeat: 2
     sequence:
       - type: inhale
-        behavior: expand
+        behavior: inhale
         duration: 2
         label: "INHALE"
   - section: B
@@ -81,8 +81,8 @@ def test_load_scheme_default_display_is_countdown(scheme_path: Path):
 
 def test_load_scheme_inherit_merges_behavior_from_base(scheme_path: Path):
     _, phases = load_scheme(str(scheme_path))
-    # B inherits A's sequence -> behavior 'expand' should survive
-    assert phases[2].behavior == "expand"
+    # B inherits A's sequence -> behavior 'inhale' should survive
+    assert phases[2].behavior == "inhale"
     assert phases[2].display == "cycles"
     assert phases[2].round_index == 2
     assert phases[2].round_total == 2
@@ -111,6 +111,31 @@ def test_load_scheme_real_preset():
     assert len(phases) == 66
     assert phases[0].type == "prepare"
     assert phases[0].behavior == "prepare"
+
+
+KNOWN_BEHAVIORS = {
+    "inhale",
+    "outhale",
+    "hold",
+    "pass",
+    "release",
+    "prepare",
+    "relax",
+}
+
+
+def test_presets_behavior_is_single_source_of_truth():
+    # YAML must stay the single, unambiguous source of truth for the circle:
+    # every behavior is known, and `type` is kept in lock-step with `behavior`.
+    for path in sorted(Path("src/wimhof/presets").glob("*.yaml")):
+        _, phases = load_scheme(str(path))
+        for p in phases:
+            assert p.behavior in KNOWN_BEHAVIORS, (
+                f"{path.name}: unknown behavior {p.behavior!r}"
+            )
+            assert p.type == p.behavior, (
+                f"{path.name}: type {p.type!r} != behavior {p.behavior!r}"
+            )
 
 
 # ----------------------------------------------------------------------

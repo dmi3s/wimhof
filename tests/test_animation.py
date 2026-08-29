@@ -74,15 +74,16 @@ def test_radius_at_follows_state():
     assert 80.0 < mid < 260.0
 
 
-def test_radius_at_pulses_on_hold():
+def test_radius_at_hold_is_static():
     center = 200.0
+    # breath retention keeps the held radius exactly, as declared in YAML
     vals = [
         animation.radius_at(center, center, t, 45.0, "hold")
-        for t in (0.0, 1.5, 3.0, 45.0)
+        for t in (0.0, 1.5, 3.0, 22.5, 45.0)
     ]
-    # stays within the gentle pulse band around the held radius
-    assert all(abs(v - center) <= 10.0 + 1e-6 for v in vals)
-    # but it actually moves (calm rhythm, not a dead static circle)
-    assert max(vals) - min(vals) > 1.0
-    # a plain pause keeps the radius exactly constant
+    assert all(v == center for v in vals)
+    # a plain pause also keeps the radius exactly constant
     assert animation.radius_at(center, center, 12.3, 45.0, "pass") == center
+    # any retention behavior (prepare/relax) is static too
+    assert animation.radius_at(center, center, 1.0, 3.0, "prepare") == center
+    assert animation.radius_at(center, center, 1.0, 3.0, "relax") == center

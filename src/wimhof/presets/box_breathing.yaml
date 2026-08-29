@@ -33,7 +33,7 @@ rounds:
         duration: 4
         label: "HOLD"
 
-      - type: exhale
+      - type: outhale
         behavior: outhale
         duration: 4
         label: "EXHALE"
@@ -54,7 +54,7 @@ rounds:
       - type: hold
         display: "cycles"
 
-      - type: exhale
+      - type: outhale
         display: "cycles"
 
       - type: hold

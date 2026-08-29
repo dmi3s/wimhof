@@ -71,9 +71,15 @@ def load_scheme(path: str) -> tuple[dict, list[Phase]]:
         for cycle in range(repeat):
             remaining = repeat - cycle
             for item in sequence:
+                item_type = item.get("type", item["behavior"])
+                if item_type != item["behavior"]:
+                    raise ValueError(
+                        f"phase 'type' ({item_type!r}) must equal 'behavior' "
+                        f"({item['behavior']!r}); YAML is the single source of truth"
+                    )
                 phases.append(
                     Phase(
-                        type=item["type"],
+                        type=item_type,
                         behavior=item["behavior"],
                         duration=item["duration"],
                         label=item["label"],
