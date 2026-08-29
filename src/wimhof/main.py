@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import math
 import sys
+import time
 from importlib.resources import files
 
 import yaml
@@ -114,6 +115,7 @@ class BreathingWidget(QWidget):
         self.timer = QTimerWithPause(self)
         self.timer.timeout.connect(self.tick)
         self.timer.start(16)
+        self._last_tick = time.monotonic()
 
         # Background music (from theme)
         self.audio_output = QAudioOutput()
@@ -177,7 +179,9 @@ class BreathingWidget(QWidget):
     # Finishing / fade out animation
     # ------------------------------------------------------------------
     def finish_tick(self):
-        dt = 0.016
+        now = time.monotonic()
+        dt = min(now - self._last_tick, 0.1)
+        self._last_tick = now
         if not self.completed:
             self.finish_t += dt
         progress = min(self.finish_t / self.finish_duration, 1.0)
@@ -199,7 +203,10 @@ class BreathingWidget(QWidget):
             self.finish_tick()
             return
 
-        dt = 0.016
+        now = time.monotonic()
+        dt = min(now - self._last_tick, 0.1)
+        self._last_tick = now
+
         self.t += dt
         p = self.phase
         progress = min(self.t / p.duration, 1.0)
@@ -470,6 +477,7 @@ class BreathingWidget(QWidget):
                     self.radius = self.MIN_R
                     self.audio_output.setVolume(0.4)
                     self.timer.reset()
+                    self._last_tick = time.monotonic()
                     if not self.muted:
                         self.player.play()
                 elif not self.paused:
@@ -479,6 +487,7 @@ class BreathingWidget(QWidget):
                 else:
                     self.paused = False
                     self.timer.resume()
+                    self._last_tick = time.monotonic()
                     if not self.muted:
                         self.player.play()
                 self.update()
