@@ -1,6 +1,7 @@
 # DEBUG PRESET — NOT FOR BREATHING PRACTICE!
-# This file demonstrates the three core behaviors (inhale / exhale / hold)
-# and the display modes. It is intended for developers and testers only.
+# This file demonstrates the four core behaviors
+# (inhale / outhale / pass / release) and the display modes.
+# It is intended for developers and testers only.
 # Do NOT use it for actual breathing exercises.
 
 rounds:
@@ -10,32 +11,41 @@ rounds:
       - type: "inhale"
         behavior: "inhale"
         duration: 2.0
-        label: "Inhale (grow & hold)"
+        label: "Inhale (grow to max)"
         display: "countdown"
 
-  - section: "Test: Exhale"
+  - section: "Test: Outhale"
     repeat: 1
     sequence:
-      - type: "exhale"
-        behavior: "exhale"
+      - type: "outhale"
+        behavior: "outhale"
         duration: 2.0
-        label: "Exhale (shrink)"
+        label: "Outhale (shrink to min)"
         display: "countdown"
 
-  - section: "Test: Hold"
+  - section: "Test: Pass"
     repeat: 1
     sequence:
-      - type: "hold"
-        behavior: "hold"
+      - type: "pass"
+        behavior: "pass"
         duration: 3.0
-        label: "Hold (keep radius)"
+        label: "Pass (keep radius)"
+        display: "countdown"
+
+  - section: "Test: Release"
+    repeat: 1
+    sequence:
+      - type: "release"
+        behavior: "release"
+        duration: 3.0
+        label: "Release (slow shrink to min)"
         display: "countdown"
 
   - section: "Test: Cycles display"
     repeat: 3
     sequence:
       - type: "cycle"
-        behavior: "hold"
+        behavior: "pass"
         duration: 1.0
         label: "Cycle counter"
         display: "cycles"

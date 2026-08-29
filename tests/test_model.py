@@ -108,9 +108,9 @@ def test_load_scheme_inherit_without_base_raises(tmp_path: Path):
 
 def test_load_scheme_real_preset():
     _, phases = load_scheme("src/wimhof/presets/wimhof.yaml")
-    assert len(phases) == 65
+    assert len(phases) == 66
     assert phases[0].type == "prepare"
-    assert phases[0].behavior == "hold"
+    assert phases[0].behavior == "prepare"
 
 
 # ----------------------------------------------------------------------

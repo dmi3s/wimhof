@@ -75,6 +75,6 @@ def test_session_progress_monotonic_sample():
 
 def test_session_from_preset_real_file():
     sess = BreathingSession.from_preset("src/wimhof/presets/wimhof.yaml")
-    assert len(sess.phases) == 65
+    assert len(sess.phases) == 66
     assert sess.total_duration > 0
     assert sess.current_phase.type == "prepare"

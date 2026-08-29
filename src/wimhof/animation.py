@@ -9,7 +9,8 @@ def target_radius(behavior: str, min_r: float, max_r: float) -> float | None:
     """
     mapping = {
         "inhale": max_r,
-        "exhale": min_r,
+        "outhale": min_r,
+        "release": min_r,
     }
     return mapping.get(behavior)
 
