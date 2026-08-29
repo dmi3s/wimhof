@@ -27,6 +27,7 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QApplication, QWidget
 
+from .animation import interpolate, pulse_offset, target_radius
 from .model import Phase, load_theme
 from .session import BreathingSession
 
@@ -131,20 +132,6 @@ class BreathingWidget(QWidget):
             return QColor(r, g, b, a)
 
     # ------------------------------------------------------------------
-    # Non‑linear interpolation helper
-    # ------------------------------------------------------------------
-    def _interpolate(
-        self, start: float, target: float, t: float, alpha: float = 1.0
-    ) -> float:
-        """
-        Non-linear interpolation using power curve.
-        t in [0,1]; applies t = t ** alpha.
-        alpha = 1.0 → linear, alpha < 1 → slow start, alpha > 1 → fast start.
-        """
-        t = t**alpha
-        return start + (target - start) * t
-
-    # ------------------------------------------------------------------
     # Session state mirrors (read-only views over self.session)
     # ------------------------------------------------------------------
     @property
@@ -227,32 +214,22 @@ class BreathingWidget(QWidget):
         p = self.phase
         progress = min(self.t / p.duration, 1.0)
         progress = ease(progress)
-        above_max = self.MAX_R * 1.25
         self.pulse_radius = 0
 
-        # ----- Update base_radius according to behavior -----
-        if p.behavior in ("expand", "shrink", "expand_big", "prepare", "hold_big"):
-            target_map = {
-                "expand": self.MAX_R,
-                "shrink": self.MIN_R,
-                "expand_big": above_max,
-                "prepare": self.MIN_R,
-                "hold_big": above_max,
-            }
-            target = target_map[p.behavior]
-            self.base_radius = self._interpolate(
-                self.phase_start_radius, target, progress, alpha=1.0
+        # ----- Update base_radius according to behavior (pure math) -----
+        if p.behavior == "fade_out":
+            self.base_radius = interpolate(
+                self.base_radius, self.MAX_R, progress / 4, alpha=0.5
             )
-        elif p.behavior == "fade_out":
-            target = self.MAX_R
-            self.base_radius = self._interpolate(
-                self.base_radius, target, progress / 4, alpha=0.5
-            )
-        elif p.behavior == "hold":
-            pass  # radius unchanged
         elif p.behavior == "pulse":
-            # Subtle oscillation, amplitude 3 pixels
-            self.pulse_radius = math.sin(self.t * 8.0) * 3.0
+            self.pulse_radius = pulse_offset(self.t)
+        else:
+            target = target_radius(p.behavior, self.MIN_R, self.MAX_R)
+            if target is not None:
+                self.base_radius = interpolate(
+                    self.phase_start_radius, target, progress, alpha=1.0
+                )
+            # hold: radius unchanged
 
         self.radius = self.base_radius + self.pulse_radius
 
