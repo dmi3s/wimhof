@@ -27,7 +27,8 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QApplication, QWidget
 
-from .model import Phase, compute_progress, load_scheme, load_theme
+from .model import Phase, load_theme
+from .session import BreathingSession
 
 # ----------------------------------------------------------------------
 # Constants for fonts
@@ -75,25 +76,14 @@ class BreathingWidget(QWidget):
         super().__init__()
         self.setWindowTitle("Breathing Trainer")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        self.completed = False
         self.paused = False
         self.muted = False
         self.showFullScreen()
 
         # Load the breathing practice (only rounds, no background/music)
-        scheme_data, self.phases = load_scheme(scheme_path)
+        self.session = BreathingSession.from_preset(scheme_path)
         # Load theme (colors + background image + background music)
         self.theme = load_theme(theme_path)
-
-        # Phase progression
-        self.index = 0
-        self.t = 0.0
-        self.total_duration = sum(p.duration for p in self.phases)
-        self.phase_start_times = []
-        acc = 0.0
-        for ph in self.phases:
-            self.phase_start_times.append(acc)
-            acc += ph.duration
 
         # Animation state
         self.base_radius: float = self.MIN_R
@@ -105,11 +95,6 @@ class BreathingWidget(QWidget):
         bg_rel = self.theme.get("background_image", "assets/background.jpg")
         bg_path = files("wimhof").joinpath(bg_rel)
         self.bg = QPixmap(str(bg_path))
-
-        # Finishing sequence
-        self.finishing = False
-        self.finish_t = 0.0
-        self.finish_duration = 6.0
 
         # Animation timer
         self.timer = QTimerWithPause(self)
@@ -159,21 +144,44 @@ class BreathingWidget(QWidget):
         t = t**alpha
         return start + (target - start) * t
 
+    # ------------------------------------------------------------------
+    # Session state mirrors (read-only views over self.session)
+    # ------------------------------------------------------------------
     @property
     def phase(self) -> Phase:
-        return self.phases[self.index]
+        return self.session.current_phase
 
-    # ------------------------------------------------------------------
-    # Phase transition
-    # ------------------------------------------------------------------
-    def next(self):
-        self.index += 1
-        self.phase_start_radius = self.base_radius + self.pulse_radius
-        self.t = 0.0
-        if self.index >= len(self.phases):
-            self.index = len(self.phases) - 1
-            self.finishing = True
-            self.finish_t = 0.0
+    @property
+    def phases(self) -> list[Phase]:
+        return self.session.phases
+
+    @property
+    def index(self) -> int:
+        return self.session.index
+
+    @property
+    def t(self) -> float:
+        return self.session.t
+
+    @property
+    def finishing(self) -> bool:
+        return self.session.finishing
+
+    @property
+    def completed(self) -> bool:
+        return self.session.completed
+
+    @property
+    def finish_t(self) -> float:
+        return self.session.finish_t
+
+    @property
+    def finish_duration(self) -> float:
+        return self.session.finish_duration
+
+    @property
+    def total_duration(self) -> float:
+        return self.session.total_duration
 
     # ------------------------------------------------------------------
     # Finishing / fade out animation
@@ -182,15 +190,13 @@ class BreathingWidget(QWidget):
         now = time.monotonic()
         dt = min(now - self._last_tick, 0.1)
         self._last_tick = now
-        if not self.completed:
-            self.finish_t += dt
-        progress = min(self.finish_t / self.finish_duration, 1.0)
+        self.session.advance(dt)
+        progress = min(self.session.finish_t / self.session.finish_duration, 1.0)
         progress = ease(progress)
         volume = 0.4 * (1.0 - progress)
         self.audio_output.setVolume(volume)
         self.pulse_radius *= 0.96
-        if progress >= 1.0:
-            self.completed = True
+        if self.session.completed:
             self.timer.stop()
             self.player.stop()
         self.update()
@@ -207,7 +213,17 @@ class BreathingWidget(QWidget):
         dt = min(now - self._last_tick, 0.1)
         self._last_tick = now
 
-        self.t += dt
+        prev_index = self.session.index
+        prev_finishing = self.session.finishing
+        self.session.advance(dt)
+
+        # A phase boundary (or entry into finishing) just happened:
+        # start the next radius interpolation from the current radius.
+        if self.session.index != prev_index or (
+            self.session.finishing and not prev_finishing
+        ):
+            self.phase_start_radius = self.base_radius + self.pulse_radius
+
         p = self.phase
         progress = min(self.t / p.duration, 1.0)
         progress = ease(progress)
@@ -240,22 +256,7 @@ class BreathingWidget(QWidget):
 
         self.radius = self.base_radius + self.pulse_radius
 
-        if self.t >= p.duration:
-            self.next()
         self.update()
-
-    # ------------------------------------------------------------------
-    # Overall session progress (0..1)
-    # ------------------------------------------------------------------
-    def current_progress(self) -> float:
-        return compute_progress(
-            self.phase_start_times,
-            self.total_duration,
-            self.index,
-            self.t,
-            self.finishing,
-            self.completed,
-        )
 
     # ------------------------------------------------------------------
     # Paint everything
@@ -347,10 +348,10 @@ class BreathingWidget(QWidget):
     # Completion overlay (fades in at the end)
     # ------------------------------------------------------------------
     def draw_completion_overlay(self, painter, alpha=220):
-        if self.completed:
+        if self.session.completed:
             progress = 1.0
         else:
-            progress = min(self.finish_t / self.finish_duration, 1.0)
+            progress = min(self.session.finish_t / self.session.finish_duration, 1.0)
             progress = ease(progress)
         progress_alpha = int(alpha * progress)
         self.draw_shadow(painter, "Completed", "Have a nice day!", progress_alpha)
@@ -403,7 +404,7 @@ class BreathingWidget(QWidget):
         h = 16
         radius = h / 2
         rect = QRectF(x, y, w, h)
-        progress = self.current_progress()
+        progress = self.session.progress()
         fill_w = w * progress
         fill_rect = QRectF(x, y, fill_w, h)
 
@@ -467,11 +468,7 @@ class BreathingWidget(QWidget):
             elif key.key() == Qt.Key.Key_Space:
                 if self.finishing or self.completed:
                     # Restart session
-                    self.completed = False
-                    self.finishing = False
-                    self.finish_t = 0.0
-                    self.index = 0
-                    self.t = 0.0
+                    self.session.restart()
                     self.base_radius = self.MIN_R
                     self.pulse_radius = 0
                     self.radius = self.MIN_R
@@ -496,6 +493,40 @@ class BreathingWidget(QWidget):
 
 
 # ----------------------------------------------------------------------
+# Headless simulation (no Qt, no audio) – the "eval" of a breathing run
+# ----------------------------------------------------------------------
+def run_simulation(scheme_path: str, dt: float = 0.25) -> None:
+    sess = BreathingSession.from_preset(scheme_path)
+    clock = 0.0
+    prev_index = sess.index
+    was_finishing = sess.finishing
+    print(
+        f"Headless simulation: {len(sess.phases)} phases, "
+        f"total {sess.total_duration:.1f}s (dt={dt}s)\n"
+    )
+    print(
+        f"  t={clock:6.2f}s  start  -> "
+        f"{sess.current_phase.label} [{sess.current_phase.section}]"
+    )
+    while not sess.completed:
+        sess.advance(dt)
+        clock += dt
+        if sess.index != prev_index:
+            print(
+                f"  t={clock:6.2f}s  phase  -> "
+                f"{sess.current_phase.label} [{sess.current_phase.section}]"
+            )
+            prev_index = sess.index
+        elif sess.finishing and not was_finishing:
+            print(
+                f"  t={clock:6.2f}s  finish -> "
+                f"{sess.current_phase.label} [{sess.current_phase.section}]"
+            )
+        was_finishing = sess.finishing
+    print(f"\nSession completed at t={clock:.2f}s.")
+
+
+# ----------------------------------------------------------------------
 # Main entry point
 # ----------------------------------------------------------------------
 def main():
@@ -512,17 +543,18 @@ def main():
         type=str,
         help="Override breathing practice file (e.g., presets/wimhof.yaml)",
     )
+    parser.add_argument(
+        "-s",
+        "--simulate",
+        action="store_true",
+        help="Run a headless simulation of the session (no GUI/audio)",
+    )
     args = parser.parse_args()
 
-    app = QApplication(sys.argv)
     wimhof_path = files("wimhof")
-    icon_path = wimhof_path.joinpath("assets", "app_icon.png")
-    app.setWindowIcon(QIcon(str(icon_path)))
 
-    # Read main config file
-    main_cfg = "config.yaml"
-
-    config_path = wimhof_path.joinpath(main_cfg)
+    # Read main config file to resolve default breathing/theme paths
+    config_path = wimhof_path.joinpath("config.yaml")
     try:
         with open(str(config_path), encoding="utf-8") as f:
             main_cfg = yaml.safe_load(f)
@@ -530,17 +562,28 @@ def main():
         print(f"Failed to load main config {config_path}: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Get paths from config, then override with command line if provided
     theme_rel = main_cfg.get("theme", "themes/default.yaml")
     breathing_rel = main_cfg.get("breathing", "presets/wimhof.yaml")
-
     if args.theme:
         theme_rel = args.theme
     if args.breathing:
         breathing_rel = args.breathing
 
-    theme_path = wimhof_path.joinpath(theme_rel)
     breathing_path = wimhof_path.joinpath(breathing_rel)
+    theme_path = wimhof_path.joinpath(theme_rel)
+
+    # Headless mode: no Qt application needed
+    if args.simulate:
+        try:
+            run_simulation(str(breathing_path))
+        except Exception as e:
+            print(f"Failed to simulate: {e}", file=sys.stderr)
+            sys.exit(1)
+        return
+
+    app = QApplication(sys.argv)
+    icon_path = wimhof_path.joinpath("assets", "app_icon.png")
+    app.setWindowIcon(QIcon(str(icon_path)))
 
     try:
         w = BreathingWidget(str(breathing_path), str(theme_path))
