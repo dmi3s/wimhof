@@ -210,7 +210,7 @@ class BreathingWidget(QWidget):
             self.phase_start_radius = self.base_radius
 
         p = self.phase
-        progress = min(self.t / p.duration, 1.0)
+        progress = min(self.session.t / p.duration, 1.0)
         progress = ease(progress)
 
         # ----- Update base_radius according to behavior (pure math) -----
@@ -268,7 +268,7 @@ class BreathingWidget(QWidget):
             elif p.display == "countdown":
                 painter.setPen(self.color("center_text"))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 44, QFont.Weight.Bold))
-                text = str(max(0, math.ceil(p.duration - self.t)))
+                text = str(max(0, math.ceil(p.duration - self.session.t)))
             else:
                 painter.setPen(self.color("center_text"))
                 painter.setFont(QFont(_APP_DEFAULT_FONT_NAME, 40))

@@ -13,7 +13,7 @@ def test_target_radius_moving_behaviors():
 
 
 def test_target_radius_retain_behaviors_return_none():
-    for beh in ("pass", "prepare", "relax", "unknown"):
+    for beh in ("hold", "pass", "prepare", "relax", "unknown"):
         assert animation.target_radius(beh, MIN_R, MAX_R) is None
 
 

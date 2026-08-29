@@ -29,7 +29,7 @@ rounds:
         label: "INHALE"
 
       - type: hold
-        behavior: pass
+        behavior: hold
         duration: 4
         label: "HOLD"
 
@@ -39,7 +39,7 @@ rounds:
         label: "EXHALE"
 
       - type: hold
-        behavior: pass
+        behavior: hold
         duration: 4
         label: "HOLD"
 

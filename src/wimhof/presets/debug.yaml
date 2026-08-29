@@ -1,10 +1,19 @@
 # DEBUG PRESET — NOT FOR BREATHING PRACTICE!
-# This file demonstrates the four core behaviors
-# (inhale / outhale / pass / release) and the display modes.
+# This file demonstrates all seven core behaviors:
+#   inhale / outhale / hold / pass / release / prepare / relax
 # It is intended for developers and testers only.
 # Do NOT use it for actual breathing exercises.
 
 rounds:
+  - section: "Test: Prepare"
+    repeat: 1
+    sequence:
+      - type: "prepare"
+        behavior: "prepare"
+        duration: 2.0
+        label: "Prepare (hold small)"
+        display: "countdown"
+
   - section: "Test: Inhale"
     repeat: 1
     sequence:
@@ -21,6 +30,15 @@ rounds:
         behavior: "outhale"
         duration: 2.0
         label: "Outhale (shrink to min)"
+        display: "countdown"
+
+  - section: "Test: Hold"
+    repeat: 1
+    sequence:
+      - type: "hold"
+        behavior: "hold"
+        duration: 3.0
+        label: "Hold (keep radius)"
         display: "countdown"
 
   - section: "Test: Pass"
@@ -41,11 +59,11 @@ rounds:
         label: "Release (slow shrink to min)"
         display: "countdown"
 
-  - section: "Test: Cycles display"
-    repeat: 3
+  - section: "Test: Relax"
+    repeat: 1
     sequence:
-      - type: "cycle"
-        behavior: "pass"
-        duration: 1.0
-        label: "Cycle counter"
-        display: "cycles"
+      - type: "relax"
+        behavior: "relax"
+        duration: 3.0
+        label: "Relax (resting)"
+        display: "countdown"

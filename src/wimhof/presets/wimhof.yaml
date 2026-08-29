@@ -55,7 +55,7 @@ rounds:
 
     sequence:
       - type: hold
-        behavior: pass
+        behavior: hold
         duration: 45
         label: "HOLD"
 
@@ -65,7 +65,7 @@ rounds:
         label: "DEEP INHALE"
 
       - type: final_hold
-        behavior: pass
+        behavior: hold
         duration: 15
         label: "HOLD"
 

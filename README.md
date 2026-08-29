@@ -13,7 +13,7 @@ and other structured breathing techniques._
 
 A desktop tool that guides you through the Wim Hof breathing method using a pulsing circle on screen.
 
-- The circle grows on `inhale`, shrinks on `outhale` and `release`, and holds on `pass` (breath retention). `prepare` and `relax` are technical start/finish states.
+- The circle grows on `inhale`, shrinks on `outhale` and `release`, and holds a definite radius on `hold` (breath retention) and `pass` (pause). `prepare` and `relax` are technical start/finish states.
 - No counting – just follow the rhythm.
 - Fully customizable: colors, background music, and phase durations are stored in YAML configs.
 - Minimalistic interface, controlled by keyboard (Space, M, Esc).
@@ -181,8 +181,8 @@ Example 4-7-8 breathing sequence:
       duration: 4
       label: "INHALE"
 
-    - type: pass
-      behavior: pass
+    - type: hold
+      behavior: hold
       duration: 7
       label: "HOLD"
 
@@ -330,4 +330,4 @@ MIT License.
 ---
 
 _Developed using Python and PySide6 (Qt) with assistance from ChatGPT and DeepSeek._
-<!-- doc-sha256: c8655c28afa9391a06c9be58ec0bb5f475e4dc6f2cf71b389e91cb2364efcbc6 -->
+<!-- doc-sha256: 805e064435d9f833723d53d2ed7fd2cace659dba1d703a398fb1513b4437c2c6 -->

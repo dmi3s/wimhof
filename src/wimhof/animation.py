@@ -4,8 +4,9 @@ from __future__ import annotations
 def target_radius(behavior: str, min_r: float, max_r: float) -> float | None:
     """Pure mapping from a phase behavior to its target ring radius.
 
-    Returns ``None`` for behaviors that do not move the ring toward a
-    target (``hold`` keeps the current radius).
+    Moving behaviors target a radius; retention behaviors
+    (``hold``, ``pass``, ``prepare``, ``relax``) return ``None`` so the
+    ring keeps its current (definite) radius.
     """
     mapping = {
         "inhale": max_r,
