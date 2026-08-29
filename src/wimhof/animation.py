@@ -1,27 +1,15 @@
 from __future__ import annotations
 
-import math
-
-# Expansion overshoot factor for *big behaviors (expand_big / hold_big)
-ABOVE_MAX_FACTOR = 1.25
-
-# Pulse oscillation frequency (rad/s) and default amplitude (pixels)
-_PULSE_FREQ = 8.0
-_DEFAULT_PULSE_AMPLITUDE = 3.0
-
 
 def target_radius(behavior: str, min_r: float, max_r: float) -> float | None:
     """Pure mapping from a phase behavior to its target ring radius.
 
     Returns ``None`` for behaviors that do not move the ring toward a
-    target (``hold``, ``pulse``, ``fade_out`` are handled separately).
+    target (``hold`` keeps the current radius).
     """
     mapping = {
-        "expand": max_r,
-        "shrink": min_r,
-        "expand_big": max_r * ABOVE_MAX_FACTOR,
-        "prepare": min_r,
-        "hold_big": max_r * ABOVE_MAX_FACTOR,
+        "inhale": max_r,
+        "exhale": min_r,
     }
     return mapping.get(behavior)
 
@@ -35,8 +23,3 @@ def interpolate(start: float, target: float, t: float, alpha: float = 1.0) -> fl
     """
     t = t**alpha
     return start + (target - start) * t
-
-
-def pulse_offset(t: float, amplitude: float = _DEFAULT_PULSE_AMPLITUDE) -> float:
-    """Subtle radius oscillation (sine), amplitude in pixels."""
-    return math.sin(t * _PULSE_FREQ) * amplitude

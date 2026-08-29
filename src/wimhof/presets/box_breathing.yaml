@@ -10,7 +10,7 @@ rounds:
     repeat: 1
     sequence:
       - type: prepare
-        behavior: prepare
+        behavior: hold
         duration: 3
         label: "PREPARE"
 
@@ -24,22 +24,22 @@ rounds:
 
     sequence:
       - type: inhale
-        behavior: expand
+        behavior: inhale
         duration: 4
         label: "INHALE"
 
       - type: hold
-        behavior: pulse_small
+        behavior: hold
         duration: 4
         label: "HOLD"
 
       - type: exhale
-        behavior: shrink
+        behavior: exhale
         duration: 4
         label: "EXHALE"
 
       - type: hold
-        behavior: pulse_small
+        behavior: hold
         duration: 4
         label: "HOLD"
 
@@ -69,6 +69,6 @@ rounds:
 
     sequence:
       - type: relax
-        behavior: fade_out
+        behavior: hold
         duration: 3
         label: "RELAX"

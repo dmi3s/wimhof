@@ -156,7 +156,7 @@ rounds:
 
     sequence:
       - type: prepare
-        behavior: prepare
+        behavior: hold
         duration: 3
         label: "PREPARE"
 ```
@@ -177,17 +177,17 @@ Example 4-7-8 breathing sequence:
 
   sequence:
     - type: inhale
-      behavior: expand
+      behavior: inhale
       duration: 4
       label: "INHALE"
 
     - type: hold
-      behavior: pulse_small
+      behavior: hold
       duration: 7
       label: "HOLD"
 
     - type: exhale
-      behavior: shrink
+      behavior: exhale
       duration: 8
       label: "EXHALE"
 
@@ -330,4 +330,4 @@ MIT License.
 ---
 
 _Developed using Python and PySide6 (Qt) with assistance from ChatGPT and DeepSeek._
-<!-- doc-sha256: f3172816da4b559fc8ed9ac96d68b18762e4cc0cbf3e853b863322a235b6eafa -->
+<!-- doc-sha256: 9754dcc4d9fde3cae149c25504b6d73897c56e6dba60fa9e57450f5fddf31fbe -->

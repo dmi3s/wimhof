@@ -1,70 +1,34 @@
 # DEBUG PRESET — NOT FOR BREATHING PRACTICE!
-# This file demonstrates all behavior types and display modes.
-# It is intended for developers and testers only.
+# This file demonstrates the three core behaviors (inhale / exhale / hold)
+# and the display modes. It is intended for developers and testers only.
 # Do NOT use it for actual breathing exercises.
 
 rounds:
-  - section: "Test: Expand"
+  - section: "Test: Inhale"
     repeat: 1
     sequence:
       - type: "inhale"
-        behavior: "expand"
+        behavior: "inhale"
         duration: 2.0
-        label: "Expand test"
+        label: "Inhale (grow & hold)"
         display: "countdown"
 
-  - section: "Test: Shrink"
+  - section: "Test: Exhale"
     repeat: 1
     sequence:
       - type: "exhale"
-        behavior: "shrink"
+        behavior: "exhale"
         duration: 2.0
-        label: "Shrink test"
+        label: "Exhale (shrink)"
         display: "countdown"
 
-  - section: "Test: Pulse (after shrink)"
-    repeat: 1
-    sequence:
-      - type: "pulse"
-        behavior: "pulse"
-        duration: 3.0
-        label: "Pulse (small oscillation)"
-        display: "countdown"
-
-  - section: "Test: Expand big"
-    repeat: 1
-    sequence:
-      - type: "inhale"
-        behavior: "expand_big"
-        duration: 2.0
-        label: "Expand big"
-        display: "countdown"
-
-  - section: "Test: Hold big"
+  - section: "Test: Hold"
     repeat: 1
     sequence:
       - type: "hold"
-        behavior: "hold_big"
-        duration: 2.0
-        label: "Hold big (large radius)"
-        display: "countdown"
-
-  - section: "Test: Prepare (fade in)"
-    repeat: 1
-    sequence:
-      - type: "prepare"
-        behavior: "prepare"
-        duration: 2.0
-        label: "Prepare"
-        display: "countdown"
-
-  - section: "Test: Fade out"
-    repeat: 1
-    sequence:
-      - type: "fade"
-        behavior: "fade_out"
-        duration: 2.0
-        label: "Fade out"
+        behavior: "hold"
+        duration: 3.0
+        label: "Hold (keep radius)"
         display: "countdown"
 
   - section: "Test: Cycles display"

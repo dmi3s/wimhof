@@ -27,7 +27,7 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QApplication, QWidget
 
-from .animation import interpolate, pulse_offset, target_radius
+from .animation import interpolate, target_radius
 from .model import Phase, load_theme
 from .session import BreathingSession
 
@@ -88,9 +88,8 @@ class BreathingWidget(QWidget):
 
         # Animation state
         self.base_radius: float = self.MIN_R
-        self.pulse_radius: float = 0
         self.radius: float = self.MIN_R
-        self.phase_start_radius: float = self.MAX_R
+        self.phase_start_radius: float = self.MIN_R
 
         # Background image (from theme)
         bg_rel = self.theme.get("background_image", "assets/background.jpg")
@@ -171,7 +170,7 @@ class BreathingWidget(QWidget):
         return self.session.total_duration
 
     # ------------------------------------------------------------------
-    # Finishing / fade out animation
+    # Finishing animation (audio fade-out)
     # ------------------------------------------------------------------
     def finish_tick(self):
         now = time.monotonic()
@@ -182,7 +181,6 @@ class BreathingWidget(QWidget):
         progress = ease(progress)
         volume = 0.4 * (1.0 - progress)
         self.audio_output.setVolume(volume)
-        self.pulse_radius *= 0.96
         if self.session.completed:
             self.timer.stop()
             self.player.stop()
@@ -209,29 +207,21 @@ class BreathingWidget(QWidget):
         if self.session.index != prev_index or (
             self.session.finishing and not prev_finishing
         ):
-            self.phase_start_radius = self.base_radius + self.pulse_radius
+            self.phase_start_radius = self.base_radius
 
         p = self.phase
         progress = min(self.t / p.duration, 1.0)
         progress = ease(progress)
-        self.pulse_radius = 0
 
         # ----- Update base_radius according to behavior (pure math) -----
-        if p.behavior == "fade_out":
+        target = target_radius(p.behavior, self.MIN_R, self.MAX_R)
+        if target is not None:
             self.base_radius = interpolate(
-                self.base_radius, self.MAX_R, progress / 4, alpha=0.5
+                self.phase_start_radius, target, progress, alpha=1.0
             )
-        elif p.behavior == "pulse":
-            self.pulse_radius = pulse_offset(self.t)
-        else:
-            target = target_radius(p.behavior, self.MIN_R, self.MAX_R)
-            if target is not None:
-                self.base_radius = interpolate(
-                    self.phase_start_radius, target, progress, alpha=1.0
-                )
-            # hold: radius unchanged
+        # hold (target is None): radius unchanged
 
-        self.radius = self.base_radius + self.pulse_radius
+        self.radius = self.base_radius
 
         self.update()
 
@@ -252,16 +242,9 @@ class BreathingWidget(QWidget):
         cx = self.width() / 2
         cy = self.height() / 2
 
-        # ----- Overlay (dimming effect for prepare/fade_out) -----
-        overlay_alpha = 140
-        if p.behavior == "prepare":
-            fade = ease(min(self.t / p.duration, 1.0))
-            overlay_alpha = int(140 * ease(fade))
-        elif p.behavior == "fade_out":
-            fade = 1.0 - min(self.t / p.duration, 1.0)
-            overlay_alpha = int(140 * ease(fade))
+        # ----- Overlay (constant dimming for focus) -----
         if not self.finishing:
-            painter.fillRect(self.rect(), self.color("overlay_black", overlay_alpha))
+            painter.fillRect(self.rect(), self.color("overlay_black", 140))
 
         # ----- Progress timeline -----
         self.draw_timeline(painter)
@@ -447,7 +430,6 @@ class BreathingWidget(QWidget):
                     # Restart session
                     self.session.restart()
                     self.base_radius = self.MIN_R
-                    self.pulse_radius = 0
                     self.radius = self.MIN_R
                     self.audio_output.setVolume(0.4)
                     self.timer.reset()
