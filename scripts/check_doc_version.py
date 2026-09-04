@@ -17,10 +17,10 @@ Modes:
 This mirrors the "sha256 sync markers" convention used elsewhere, kept
 effortless: locally the marker heals itself, CI only enforces it.
 """
+
 from __future__ import annotations
 
 import hashlib
-import os
 import re
 import sys
 
